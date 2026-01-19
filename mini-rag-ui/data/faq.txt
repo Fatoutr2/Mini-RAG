@@ -1,0 +1,8 @@
+Le RAG (Retrieval-Augmented Generation) combine la recherche documentaire
+avec des modèles de langage. Il permet de répondre avec des informations
+externes au modèle.
+
+Le RAG est une IA générative spécialisée qui :
+•	Utilise un modèle de langage (LLM) pour générer du texte.
+•	Recherche et récupère des informations pertinentes dans une base de connaissances interne ou externe avant de répondre.
+•	Génère des réponses contextuelles et adaptées à la question posée.
