@@ -1,0 +1,13 @@
+TechNova Solutions est une entreprise de développement logiciel fondée en 2018.
+Elle est spécialisée dans les applications web, mobiles et les solutions basées sur l’intelligence artificielle.
+
+L’entreprise utilise principalement les technologies suivantes :
+- Backend : Python (FastAPI, Django), Java, Node.js
+- Frontend : React, Angular
+- Bases de données : PostgreSQL, MySQL, MongoDB
+- Cloud : AWS, Azure
+
+TechNova Solutions applique des méthodes agiles (Scrum, Kanban).
+Les équipes sont organisées en squads composées de développeurs backend, frontend, QA et DevOps.
+
+La mission de TechNova est de fournir des solutions robustes, sécurisées et évolutives pour ses clients.

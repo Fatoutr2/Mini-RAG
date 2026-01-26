@@ -1,0 +1,11 @@
+{
+  "company": "TechNova Solutions",
+  "default_backend": "FastAPI",
+  "default_frontend": "React",
+  "cloud_provider": "AWS",
+  "ci_cd": true,
+  "security": {
+    "code_review_required": true,
+    "tests_required": true
+  }
+}
