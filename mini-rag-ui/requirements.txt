@@ -1,8 +1,20 @@
+# API
+fastapi
+uvicorn
+
+# RAG & NLP
 sentence-transformers
 faiss-cpu
 openai
+
+# Data & utils
 numpy
+pandas
+
+# File loaders
 PyPDF2
 python-docx
-pandas
 openpyxl
+
+# Config & env
+python-dotenv
