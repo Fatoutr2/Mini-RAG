@@ -1,129 +1,154 @@
-/* RESET */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* BACKGROUND */
-body {
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: url("./assets/bg.jpg") no-repeat center center fixed;
-  background-size: cover;
-  color: #fff;
-}
-
-/* OVERLAY */
-.app-overlay {
-  min-height: 100vh;
-  background: rgba(0, 0, 0, 0.75);
-  padding: 40px 20px;
-}
-
-/* CONTAINER */
-.app-container {
-  max-width: 900px;
-  margin: auto;
-}
-
-/* HEADER */
-h1 {
-  text-align: center;
-  margin-bottom: 10px;
-  color: #00e5ff;
-}
-
-.subtitle {
-  text-align: center;
-  margin-bottom: 30px;
-  color: #ccc;
-}
-
-/* INPUT ZONE */
-.input-container {
+/* Dashboard layout */
+.dashboard {
   display: flex;
-  gap: 10px;
-  margin-bottom: 30px;
+  height: 100vh;
+  width: 100%;
+  background-color: #f4f5f7;
 }
 
-.input-container input {
-  flex: 1;
-  padding: 14px;
-  border-radius: 8px;
-  border: none;
-  font-size: 16px;
-}
-
-.input-container button {
-  padding: 14px 24px;
-  border-radius: 8px;
-  border: none;
-  background: #00e5ff;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.input-container button:hover {
-  background: #00bcd4;
-}
-
-/* CARDS */
-.card {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px);
+/* Sidebar fixe à gauche */
+.sidebar {
+  width: 250px;
+  background-color: #2d2c2c;
+  color: white;
+  display: flex;
+  flex-direction: column;
   padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }
 
-/* ANSWER */
-.answer {
-  line-height: 1.6;
+/* Titre et bouton nouvelle discussion */
+.sidebar h2 {
+  margin: 0 0 20px 0;
+  color: #574f4f;
+  font-size: 1.5rem;
 }
 
-/* CHUNKS */
-.chunk {
-  margin-bottom: 10px;
+.sidebar .new-chat {
+  background-color: #444548;
+  color: white;
+  border: none;
+  padding: 10px 15px;
   border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: auto;
+}
+
+.sidebar .new-chat:hover {
+  background-color: #333334;
+}
+
+/* Footer du sidebar */
+.sidebar-footer {
+  margin-top: auto;
+}
+
+.sidebar-footer button {
+  background-color: #422b29;
+  border: none;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.sidebar-footer button:hover {
+  background-color: #2b1817;
+}
+
+/* Zone principale (chat) */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #f7f7f8;
+}
+
+/* Top bar (connexion / déconnexion) */
+.top-bar {
+  padding: 10px 20px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Chat container */
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
   overflow: hidden;
 }
 
-.chunk-header {
-  background: rgba(0, 229, 255, 0.15);
-  padding: 12px;
-  cursor: pointer;
-  font-weight: bold;
+/* Messages */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.chunk-content {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 12px;
+.bubble {
+  padding: 12px 16px;
+  border-radius: 16px;
+  max-width: 70%;
+  word-wrap: break-word;
   line-height: 1.5;
 }
 
-/* STATES */
-.loading,
-.error {
-  text-align: center;
-  margin: 20px 0;
+.bubble.user {
+  align-self: flex-end;
+  background-color: #2d2c2c;
+  color: white;
 }
 
-.error {
-  color: #ff6b6b;
+.bubble.assistant {
+  align-self: flex-start;
+  background-color: white;
+  color: #1e1e1e;
 }
 
-/* SPINNER */
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #555;
-  border-top: 4px solid #00e5ff;
-  border-radius: 50%;
-  margin: auto;
-  animation: spin 1s linear infinite;
+/* Chat input */
+.chat-input {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+}
+
+.chat-input button {
+  padding: 10px 20px;
+  border-radius: 12px;
+  background-color: #2d2c2c;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.chat-input button:hover {
+  background-color: #000000;
+}
+
+/* Sources et chunks */
+.sources {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.chunk {
+  background: #f1f1f1;
+  padding: 8px;
+  border-radius: 8px;
+  margin-top: 6px;
 }

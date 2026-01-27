@@ -1,4 +1,4 @@
-import { useState } from "react";
+/*import { useState } from "react";
 import "./App.css";
 
 function App() {
@@ -18,9 +18,14 @@ function App() {
     setChunks([]);
 
     try {
+      const token = localStorage.getItem("token");
+
       const res = await fetch("http://127.0.0.1:8000/query", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ question }),
       });
 
@@ -104,3 +109,30 @@ function App() {
 }
 
 export default App;
+*/
+
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminRouter from "./routes/AdminRouter";
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminRouter>
+              <AdminDashboard />
+            </AdminRouter>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+

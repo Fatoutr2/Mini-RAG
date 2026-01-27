@@ -13,7 +13,7 @@ from .rag.reranker import rerank
 from .rag.prompt import build_prompt
 
 load_dotenv()
-print("🚀 OPENROUTER_API_KEY au démarrage :", os.getenv("OPENROUTER_API_KEY"))
+#print("🚀 OPENROUTER_API_KEY au démarrage :", os.getenv("OPENROUTER_API_KEY"))
 
 
 api_key = os.getenv("OPENROUTER_API_KEY")

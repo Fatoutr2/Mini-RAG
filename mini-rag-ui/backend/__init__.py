@@ -8,7 +8,9 @@ from backend.rag.loaders.pdf_loader import load_pdf
 from backend.rag.loaders.docx_loader import load_docx
 from backend.rag.loaders.csv_loader import load_csv
 from backend.rag.loaders.excel_loader import load_excel
+from backend.rag.loaders.excel_loader import load_excel_as_chunks
 from backend.rag.loaders.json_loader import load_json
+from backend.rag.loaders.json_loader import load_json_as_chunks
 from backend.rag.loaders.db_loader import load_db_jobs
 
 
@@ -25,9 +27,9 @@ def load_file(path: str):
     elif path.endswith(".csv"):
         return load_csv(path)
     elif path.endswith(".xls") or path.endswith(".xlsx"):
-        return load_excel(path)
+        return load_excel_as_chunks(path)
     elif path.endswith(".json"):
-        return load_json(path)
+        return load_json_as_chunks(path)
 
     return []
 
