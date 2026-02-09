@@ -1,4 +1,3 @@
-/* ===== ADMIN PAGES LAYOUT ===== */
 .admin-page-content {
   flex: 1;
   padding: 24px;
@@ -32,7 +31,6 @@
   border-radius: 10px;
 }
 
-/* ===== CARDS ===== */
 .admin-card {
   background: #24262b;
   border: 1px solid #3b3f47;
@@ -48,7 +46,6 @@
   color: #e5e7eb;
 }
 
-/* ===== FORM ===== */
 .admin-form {
   display: grid;
   gap: 10px;
@@ -80,7 +77,6 @@
   font-size: 14px;
 }
 
-/* ===== BUTTONS ===== */
 .admin-btn {
   border: 1px solid #4b5563;
   background: #2d3748;
@@ -121,7 +117,6 @@
   cursor: not-allowed;
 }
 
-/* ===== TABLE ===== */
 .admin-table-wrap {
   overflow-x: auto;
 }
@@ -151,7 +146,6 @@
   background: rgba(55, 65, 81, 0.25);
 }
 
-/* ===== BADGES ===== */
 .role-badge {
   display: inline-block;
   padding: 4px 10px;
@@ -178,14 +172,12 @@
   color: #fed7aa;
 }
 
-/* ===== ACTIONS ===== */
 .admin-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-/* ===== MOBILE ===== */
 @media (max-width: 900px) {
   .admin-page-content {
     padding: 16px;

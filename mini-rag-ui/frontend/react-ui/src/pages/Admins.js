@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import AdminSidebar from "../components/AdminSidebar";
-import { listUsers, updateUser, updateUserRole, deleteUser } from "../services/adminUserService";
+import { deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
-
 
 export default function AdminsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -13,6 +12,7 @@ export default function AdminsPage() {
 
   const load = async () => {
     try {
+      setError("");
       const data = await listUsers();
       setUsers(data);
     } catch (e) {
@@ -20,25 +20,27 @@ export default function AdminsPage() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const admins = useMemo(() => users.filter((u) => u.role === "admin"), [users]);
 
-  const editUser = async (u) => {
+  const onEdit = async (u) => {
     const email = prompt("Nouvel email", u.email);
     if (!email) return;
     await updateUser(u.id, { email: email.trim() });
     await load();
   };
 
-  const changeRole = async (u) => {
+  const onRole = async (u) => {
     const role = prompt("Nouveau rôle: member/admin/visitor", u.role);
     if (!role) return;
     await updateUserRole(u.id, role.trim());
     await load();
   };
 
-  const removeUser = async (u) => {
+  const onDelete = async (u) => {
     if (!window.confirm(`Supprimer ${u.email} ?`)) return;
     await deleteUser(u.id);
     await load();
@@ -48,42 +50,51 @@ export default function AdminsPage() {
     <div className="app-layout">
       <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} />
       <div className="content-row">
-        <AdminSidebar
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          threads={[]}
-          activeThreadId={null}
-          onNewChat={() => {}}
-          onSearch={() => {}}
-          onSelectThread={() => {}}
-          onRenameThread={() => {}}
-          onDeleteThread={() => {}}
-        />
+        <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} threads={[]} activeThreadId={null} />
 
-        <main style={{ flex: 1, padding: 20, overflow: "auto" }}>
-          <h2>🛡 Admins</h2>
-          {error && <p style={{ color: "tomato" }}>{error}</p>}
+        <main className="admin-page-content">
+          <div className="admin-page-header">
+            <h1 className="admin-page-title">🛡 Admins</h1>
+            <p className="admin-page-subtitle">Gérer les comptes administrateurs : édition, rôle et suppression.</p>
+          </div>
 
-          <table width="100%" cellPadding="8">
-            <thead>
-              <tr><th>ID</th><th>Email</th><th>Rôle</th><th>Actif</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-              {admins.map((u) => (
-                <tr key={u.id}>
-                  <td>{u.id}</td>
-                  <td>{u.email}</td>
-                  <td>{u.role}</td>
-                  <td>{u.is_active ? "Oui" : "Non"}</td>
-                  <td>
-                    <button onClick={() => editUser(u)}>Modifier</button>{" "}
-                    <button onClick={() => changeRole(u)}>Changer rôle</button>{" "}
-                    <button onClick={() => removeUser(u)}>Supprimer</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {error && <p className="admin-error">{error}</p>}
+
+          <section className="admin-card">
+            <h2 className="admin-card-title">Liste des admins</h2>
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Actif</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {admins.map((u) => (
+                    <tr key={u.id}>
+                      <td>{u.id}</td>
+                      <td>{u.email}</td>
+                      <td>
+                        <span className={`role-badge ${u.role}`}>{u.role}</span>
+                      </td>
+                      <td>{u.is_active ? "Oui" : "Non"}</td>
+                      <td>
+                        <div className="admin-actions">
+                          <button className="admin-btn" onClick={() => onEdit(u)}>Modifier</button>
+                          <button className="admin-btn" onClick={() => onRole(u)}>Changer rôle</button>
+                          <button className="admin-btn danger" onClick={() => onDelete(u)}>Supprimer</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
         </main>
       </div>
     </div>
