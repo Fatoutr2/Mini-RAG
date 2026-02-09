@@ -1,227 +1,174 @@
-# 🧠 Mini RAG Prototype (React + FastAPI)
+# 🧠 Mini-RAG (FastAPI + React)
 
-Ce projet est un **mini prototype RAG (Retrieval-Augmented Generation)** combinant :
-
-* un **frontend React** pour l’interface utilisateur
-* un **backend FastAPI** pour la recherche et le raisonnement
-* une **base de données vectorielle FAISS** (`rag-db`) pour stocker les chunks, les utilisateurs et aussi les conversations.
-
-Il permet de poser des questions sur des documents (PDF, Word, Excel, CSV, JSON, TXT,…) et d’obtenir des réponses basées sur leur contenu.
+Mini-RAG est une application de chat RAG avec authentification (member/admin), conversations privées par thread, et panneau admin pour la gestion des utilisateurs.
 
 ---
 
-## 🏗️ Architecture du projet
+## 🚀 Fonctionnalités principales
 
-```
-mini-rag-ui/
-│
-├── backend/                           # Serveur FastAPI
-│   ├── api.py                         # Point d'entrée API
-│   ├── rag_engine.py                  # Logique RAG
-│   ├── database.py                    # Gestion base de données (SQLAlchemy ou SQLite)
-│   ├── utils.py                       # Fonctions utilitaires (hash, token, validation)
-│   ├── __init__.py
-│
-│   ├── auth/                          # Authentification backend
-│   │   ├── __init__.py
-│   │   ├── routes.py                  # Endpoints /login, /register, /logout
-│   │   └── schemas.py                 # Pydantic models pour User, Login, Register
-│
-│   ├── rag/                           # Module RAG
-│   │   ├── loaders/                   # Chargeurs de fichiers
-│   │   │   ├── __init__.py
-│   │   │   ├── txt_loader.py
-│   │   │   ├── pdf_loader.py
-│   │   │   ├── docx_loader.py
-│   │   │   ├── csv_loader.py
-│   │   │   ├── xlsx_loader.py
-│   │   │   ├── json_loader.py
-│   │   │   └── db_loader.py
-│   │   │
-│   │   ├── chunking.py                # Découpe documents en chunks
-│   │   ├── embeddings.py              # Création embeddings
-│   │   ├── retriever.py               # Recherche chunks pertinents
-│   │   ├── reranker.py                # Tri / filtrage
-│   │   ├── vectorstore.py             # Stockage vectoriel
-│   │   ├── prompt.py                  # Templates pour prompt
-│   │   └── __init__.py
-│
-├── cli/                               # CLI optionnelle
-│   ├── main.py
-│   └── __init__.py
-│
-├── data/
-│   └── documents/                     # Tous les fichiers de données
-│
-├── frontend/
-│   └── react-ui/
-│       └── src/
-│           ├── components/           # Composants réutilisables
-│           │   ├── ChatWindow.js
-│           │   ├── ChatMessages.js
-│           │   ├── Sidebar.js
-│           │
-│           ├── pages/                # Pages principales et modals
-│           │   ├── Dashboard.js
-│           │   ├── AdminDashboard.js
-│           │   ├── LoginModal.js
-│           │   └── RegisterModal.js
-│           │
-│           ├── routes/               # Routes sécurisées / admin
-│           │   ├── ProtectedRoute.js
-│           │   └── AdminRouter.js
-│           │
-│           ├── services/             # Services API
-│           │   ├── authService.js
-│           │   └── chatService.js
-│           │
-│           ├── App.js
-│           └── App.css
-│
-└── screenshots                        # Captures (Exemples de quelques questions a poser)
-|
-└── venv/                               # Environnement virtuel Python
-```
+- Chat privé RAG (`/member`, `/admin`)
+- Conversations par thread (création, renommage, suppression)
+- Auth JWT (register/login)
+- Rôles: `visitor`, `member`, `admin`
+- Pages admin:
+  - `/admin/access` : création + gestion des utilisateurs
+  - `/admin/members` : gestion des membres
+  - `/admin/admins` : gestion des admins
+- RAG public (`/rag/visitor`)
+
+---
+
+## 🏗️ Architecture
+
+```text
+Mini-RAG/
+├── README.md
+└── mini-rag-ui/
+    ├── requirements.txt
+    ├── backend/
+    │   ├── api.py
+    │   ├── rag_engine.py
+    │   ├── database.py
+    │   ├── utils.py
+    │   ├── auth/
+    │   │   ├── security.py
+    │   │   ├── routes.py
+    │   │   └── models.py
+    │   ├── admin/
+    │   │   └── routes.py
+    │   └── rag/
+    │       ├── chunking.py
+    │       ├── embeddings.py
+    │       ├── retriever.py
+    │       ├── reranker.py
+    │       ├── vectorstore.py
+    │       ├── prompt.py
+    │       ├── social.py
+    │       └── loaders/
+    │           ├── txt_loader.py
+    │           ├── pdf_loader.py
+    │           ├── docx_loader.py
+    │           ├── csv_loader.py
+    │           ├── excel_loader.py
+    │           ├── json_loader.py
+    │           └── db_loader.py
+    ├── data/
+    │   ├── public/
+    │   └── private/
+    └── frontend/react-ui/
+        ├── package.json
+        ├── public/
+        └── src/
+            ├── App.js
+            ├── auth/
+            ├── components/
+            ├── pages/
+            ├── routes/
+            ├── services/
+            └── assets/css/
+
 
 ---
 
 ## ⚙️ Prérequis
+Python 3.11+
 
-* **Python 3.11.9**
-* **Node.js 18+**
-* **pip** 
-* Git
+Node.js 18+
 
----
+PostgreSQL
 
-## 📦 Installation Backend (FastAPI + RAG)
+pip / venv
 
-### 1️⃣ Créer un environnement virtuel
+--- 
 
-```bash
-python -m venv venv
-venv\Scripts\activate   # Windows
-```
 
-### 2️⃣ Installer les dépendances
-
-```bash
+## 🔧 Installation backend
+cd mini-rag-ui
+python -m venv .venv
+source .venv/bin/activate   # Linux/Mac
+# .venv\Scripts\activate    # Windows
 pip install -r requirements.txt
-```
-
----
-
- ## ➡️ Définir la clé API OpenRouter :
-
-```bash
-export OPENROUTER_API_KEY="votre_cle_api"
-```
-
----
-
-## ▶️ Lancer le backend
-
-```bash
+Variables d’environnement (exemple)
+export OPENROUTER_API_KEY="..."
+# optionnel selon votre setup
+export DATABASE_URL="postgresql://postgres:postgres123@localhost:5432/rag-db"
+Lancer l’API
 uvicorn backend.api:app --reload
-```
-
-Backend disponible sur :
-
-```
-http://127.0.0.1:8000
-```
+API : http://127.0.0.1:8000
 
 ---
 
-## 💻 Installation Frontend (React)
 
-```bash
-cd frontend/react-ui
+## 💻 Installation frontend
+cd mini-rag-ui/frontend/react-ui
 npm install
 npm start
-```
-
-Frontend disponible sur :
-
-```
-http://localhost:3000
-```
+Frontend : http://localhost:3000
 
 ---
 
-## 🔐 Authentification (401 Unauthorized)
 
-L’API `/query` est protégée.
+## 🔐 Auth et rôles
+POST /auth/register : crée un compte member
 
-Exemple de header attendu :
+POST /auth/login : retourne access_token JWT
 
-```http
-Authorization: Bearer admin-token
-```
+Routes frontend protégées:
 
-➡️ Le token est défini dans `config.json`.
+/member → ProtectedRoute
 
----
-
-## 🗂️ Base de données RAG (`rag-db`)
-
-* Type : **FAISS (vector store)**
-* Emplacement :
-
-```
-backend/rag-db/
-```
-
-Contient :
-
-* index FAISS
-* métadonnées des chunks
-
-⚠️ Générée automatiquement lors de l’ingestion.
+/admin, /admin/access, /admin/members, /admin/admins → AdminRoute
 
 ---
 
-## 📄 Types de documents supportés
+## 🧭 Routes frontend
+/ : landing / auth
 
-* PDF (`.pdf`)
-* Word (`.docx`)
-* Excel (`.xlsx`)
-* CSV (`.csv`)
-* JSON(`.json`)
-* TXT (`.txt`)
-* BASE DE DONNEES
+/member : chat member
 
----
+/admin : chat admin
 
-## 🧪 Exemple de requête
+/admin/access : création + gestion utilisateurs
 
-```json
-{
-  "question": "Qui travaille sur le projet ShopNow ?"
-}
-```
+/admin/members : listing membres
+
+/admin/admins : listing admins
 
 ---
 
----
+## 🧩 Endpoints backend (principaux)
+Public
+GET /public/company-info
 
-## 🚀 Technologies utilisées
+POST /rag/visitor
 
-* FastAPI
-* Sentence-Transformers
-* FAISS
-* OpenAI API
-* React.js
-* PyPDF2
-* python-docx
-* pandas
-* openpyxl
+Auth
+POST /auth/register
 
----
+POST /auth/login
 
-## ❗ Règles du système
+Chat Threads
+POST /conversations
 
-* L’IA répond **uniquement** à partir des documents fournis.
-* Si l’information n’existe pas dans les documents, elle refuse de répondre.
+GET /conversations/me
+
+GET /conversations/{thread_id}/messages
+
+POST /conversations/{thread_id}/messages
+
+PATCH /conversations/{thread_id}
+
+DELETE /conversations/{thread_id}
+
+Admin Users
+GET /auth/admin/users
+
+POST /auth/admin/users
+
+PUT /auth/admin/users/{user_id}
+
+PUT /auth/admin/users/{user_id}/role?new_role=...
+
+DELETE /auth/admin/users/{user_id}
 
 ---

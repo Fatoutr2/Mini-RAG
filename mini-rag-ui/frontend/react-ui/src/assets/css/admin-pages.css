@@ -1,0 +1,197 @@
+/* ===== ADMIN PAGES LAYOUT ===== */
+.admin-page-content {
+  flex: 1;
+  padding: 24px;
+  overflow: auto;
+  background: #2f3136;
+  color: #f3f4f6;
+}
+
+.admin-page-header {
+  margin-bottom: 18px;
+}
+
+.admin-page-title {
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.admin-page-subtitle {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.admin-error {
+  margin: 10px 0 16px;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.2);
+  border: 1px solid #7f1d1d;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+/* ===== CARDS ===== */
+.admin-card {
+  background: #24262b;
+  border: 1px solid #3b3f47;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.admin-card-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #e5e7eb;
+}
+
+/* ===== FORM ===== */
+.admin-form {
+  display: grid;
+  gap: 10px;
+  max-width: 460px;
+}
+
+.admin-input,
+.admin-select {
+  width: 100%;
+  border: 1px solid #4b5563;
+  background: #1f2329;
+  color: #f9fafb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.admin-input:focus,
+.admin-select:focus {
+  border-color: #19c37d;
+  box-shadow: 0 0 0 2px rgba(25, 195, 125, 0.2);
+}
+
+.admin-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e5e7eb;
+  font-size: 14px;
+}
+
+/* ===== BUTTONS ===== */
+.admin-btn {
+  border: 1px solid #4b5563;
+  background: #2d3748;
+  color: #fff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.admin-btn:hover {
+  background: #374151;
+}
+
+.admin-btn.primary {
+  background: #19c37d;
+  border-color: #19c37d;
+  color: #0b1f14;
+  font-weight: 700;
+}
+
+.admin-btn.primary:hover {
+  background: #16a56a;
+}
+
+.admin-btn.danger {
+  border-color: #7f1d1d;
+  color: #fecaca;
+  background: transparent;
+}
+
+.admin-btn.danger:hover {
+  background: rgba(127, 29, 29, 0.25);
+}
+
+.admin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== TABLE ===== */
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid #3b3f47;
+  vertical-align: middle;
+}
+
+.admin-table thead th {
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.admin-table tbody tr:hover {
+  background: rgba(55, 65, 81, 0.25);
+}
+
+/* ===== BADGES ===== */
+.role-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid transparent;
+}
+
+.role-badge.member {
+  background: rgba(30, 64, 175, 0.18);
+  border-color: #1e40af;
+  color: #bfdbfe;
+}
+
+.role-badge.admin {
+  background: rgba(6, 78, 59, 0.25);
+  border-color: #047857;
+  color: #bbf7d0;
+}
+
+.role-badge.visitor {
+  background: rgba(120, 53, 15, 0.2);
+  border-color: #92400e;
+  color: #fed7aa;
+}
+
+/* ===== ACTIONS ===== */
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 900px) {
+  .admin-page-content {
+    padding: 16px;
+  }
+
+  .admin-page-title {
+    font-size: 20px;
+  }
+}

@@ -9,6 +9,8 @@ import {
   deleteThread,
 } from "../services/chatService";
 import "../assets/css/layout.css";
+import "../assets/css/admin-pages.css";
+
 
 export default function AdminPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

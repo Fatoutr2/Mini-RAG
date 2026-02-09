@@ -9,6 +9,8 @@ import {
   deleteUser,
 } from "../services/adminUserService";
 import "../assets/css/layout.css";
+import "../assets/css/admin-pages.css";
+
 
 export default function AccessPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

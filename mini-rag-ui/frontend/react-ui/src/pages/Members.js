@@ -3,6 +3,8 @@ import Navbar from "../components/Navbar";
 import AdminSidebar from "../components/AdminSidebar";
 import { listUsers, updateUser, updateUserRole, deleteUser } from "../services/adminUserService";
 import "../assets/css/layout.css";
+import "../assets/css/admin-pages.css";
+
 
 export default function MembersPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

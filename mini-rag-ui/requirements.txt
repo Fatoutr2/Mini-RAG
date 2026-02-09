@@ -1,24 +1,30 @@
 # API
-fastapi
-uvicorn
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
 
-# RAG & NLP
-sentence-transformers
-faiss-cpu
-openai
+# Validation / schemas
+pydantic>=2.6.0
+email-validator>=2.1.0
 
-# Data & utils
-numpy
-pandas
-bcrypt
-pydantic
-jwt
-passlib
+# Auth / sécurité
+PyJWT>=2.8.0
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.1.2
+
+# Base de données
+psycopg2-binary>=2.9.9
+
+# RAG / IA
+sentence-transformers>=2.6.0
+faiss-cpu>=1.8.0
+openai>=1.30.0
+numpy>=1.26.0
+pandas>=2.2.0
 
 # File loaders
-PyPDF2
-python-docx
-openpyxl
+PyPDF2>=3.0.1
+python-docx>=1.1.0
+openpyxl>=3.1.2
 
-# Config & env
-python-dotenv
+# Env
+python-dotenv>=1.0.1
