@@ -1,25 +1,52 @@
 const API_BASE = "http://127.0.0.1:8000";
 
-function authHeaders() {
-  const token = localStorage.getItem("token");
+function headers() {
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
   };
 }
 
-export async function fetchMyConversations() {
-  const res = await fetch(`${API_BASE}/conversations/me`, {
-    headers: authHeaders(),
-  });
-  if (!res.ok) throw new Error("Impossible de charger l'historique");
+export async function listThreads(search = "") {
+  const url = new URL(`${API_BASE}/conversations/me`);
+  if (search?.trim()) url.searchParams.set("search", search.trim());
+
+  const res = await fetch(url, { headers: headers() });
+  if (!res.ok) throw new Error("Impossible de charger les conversations");
   return res.json();
 }
 
-export async function askQuestion(question) {
-  const res = await fetch(`${API_BASE}/query`, {
+export async function createThread() {
+  const res = await fetch(`${API_BASE}/conversations`, {
     method: "POST",
-    headers: authHeaders(),
+    headers: headers(),
+  });
+  if (!res.ok) throw new Error("Impossible de créer un chat");
+  return res.json();
+}
+
+export async function renameThread(threadId, title) {
+  const res = await fetch(`${API_BASE}/conversations/${threadId}`, {
+    method: "PATCH",
+    headers: headers(),
+    body: JSON.stringify({ title }),
+  });
+  if (!res.ok) throw new Error("Impossible de renommer");
+  return res.json();
+}
+
+export async function getMessages(threadId) {
+  const res = await fetch(`${API_BASE}/conversations/${threadId}/messages`, {
+    headers: headers(),
+  });
+  if (!res.ok) throw new Error("Impossible de charger les messages");
+  return res.json();
+}
+
+export async function sendMessage(threadId, question) {
+  const res = await fetch(`${API_BASE}/conversations/${threadId}/messages`, {
+    method: "POST",
+    headers: headers(),
     body: JSON.stringify({ question }),
   });
   if (!res.ok) throw new Error("Erreur serveur");

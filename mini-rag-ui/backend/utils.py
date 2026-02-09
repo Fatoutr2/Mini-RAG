@@ -1,7 +1,7 @@
 from .database import get_db
 from fastapi import Depends, HTTPException
 from .api import get_current_user
-
+import re
 
 def save_conversation(user_id, question, answer, sources=None):
     with get_db() as conn:
@@ -62,3 +62,204 @@ def get_all_conversations(user=Depends(get_current_user)):
         cur.close()
 
     return conversations
+
+
+def _normalize_title(text: str, max_len: int = 60) -> str:
+    clean = re.sub(r"\s+", " ", (text or "").strip())
+    return clean[:max_len] if clean else "Nouveau chat"
+
+
+def create_thread(user_id: int, title: str = "Nouveau chat"):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO chat_threads (user_id, title)
+            VALUES (%s, %s)
+            RETURNING id, user_id, title, created_at, updated_at
+            """,
+            (user_id, title),
+        )
+        row = cur.fetchone()
+        conn.commit()
+        cur.close()
+
+    return {
+        "id": row[0],
+        "user_id": row[1],
+        "title": row[2],
+        "created_at": row[3],
+        "updated_at": row[4],
+    }
+
+
+def list_threads(user_id: int, search: str = ""):
+    with get_db() as conn:
+        cur = conn.cursor()
+        if search:
+            cur.execute(
+                """
+                SELECT id, user_id, title, created_at, updated_at
+                FROM chat_threads
+                WHERE user_id = %s AND title ILIKE %s
+                ORDER BY updated_at DESC
+                """,
+                (user_id, f"%{search}%"),
+            )
+        else:
+            cur.execute(
+                """
+                SELECT id, user_id, title, created_at, updated_at
+                FROM chat_threads
+                WHERE user_id = %s
+                ORDER BY updated_at DESC
+                """,
+                (user_id,),
+            )
+        rows = cur.fetchall()
+        cur.close()
+
+    return [
+        {
+            "id": r[0],
+            "user_id": r[1],
+            "title": r[2],
+            "created_at": r[3],
+            "updated_at": r[4],
+        }
+        for r in rows
+    ]
+
+
+def get_thread_messages(user_id: int, thread_id: int):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id FROM chat_threads WHERE id=%s AND user_id=%s",
+            (thread_id, user_id),
+        )
+        owner = cur.fetchone()
+        if not owner:
+            cur.close()
+            raise HTTPException(404, "Conversation introuvable")
+
+        cur.execute(
+            """
+            SELECT id, role, content, created_at
+            FROM chat_messages
+            WHERE thread_id = %s
+            ORDER BY created_at ASC
+            """,
+            (thread_id,),
+        )
+        rows = cur.fetchall()
+        cur.close()
+
+    return [
+        {"id": r[0], "role": r[1], "content": r[2], "created_at": r[3]}
+        for r in rows
+    ]
+
+
+def rename_thread(user_id: int, thread_id: int, title: str):
+    new_title = _normalize_title(title, 120)
+
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            UPDATE chat_threads
+            SET title=%s, updated_at=NOW()
+            WHERE id=%s AND user_id=%s
+            RETURNING id, user_id, title, created_at, updated_at
+            """,
+            (new_title, thread_id, user_id),
+        )
+        row = cur.fetchone()
+        conn.commit()
+        cur.close()
+
+    if not row:
+        raise HTTPException(404, "Conversation introuvable")
+
+    return {
+        "id": row[0],
+        "user_id": row[1],
+        "title": row[2],
+        "created_at": row[3],
+        "updated_at": row[4],
+    }
+
+
+def delete_thread(user_id: int, thread_id: int):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "DELETE FROM chat_threads WHERE id=%s AND user_id=%s RETURNING id",
+            (thread_id, user_id),
+        )
+        row = cur.fetchone()
+        conn.commit()
+        cur.close()
+
+    if not row:
+        raise HTTPException(404, "Conversation introuvable")
+    return {"ok": True}
+
+
+def append_message_and_answer(user_id: int, thread_id: int, question: str, answer: str):
+    auto_title = _normalize_title(question)
+
+    with get_db() as conn:
+        cur = conn.cursor()
+
+        # Vérifier ownership thread
+        cur.execute(
+            "SELECT title FROM chat_threads WHERE id=%s AND user_id=%s",
+            (thread_id, user_id),
+        )
+        row = cur.fetchone()
+        if not row:
+            cur.close()
+            raise HTTPException(404, "Conversation introuvable")
+
+        current_title = row[0] or "Nouveau chat"
+
+        # Insert user message
+        cur.execute(
+            """
+            INSERT INTO chat_messages (thread_id, role, content)
+            VALUES (%s, 'user', %s)
+            """,
+            (thread_id, question),
+        )
+
+        # Insert assistant message
+        cur.execute(
+            """
+            INSERT INTO chat_messages (thread_id, role, content)
+            VALUES (%s, 'assistant', %s)
+            """,
+            (thread_id, answer),
+        )
+
+        # Auto-title uniquement si titre par défaut
+        if current_title.strip().lower() in {"nouveau chat", "conversation"}:
+            cur.execute(
+                """
+                UPDATE chat_threads
+                SET title=%s, updated_at=NOW()
+                WHERE id=%s
+                """,
+                (auto_title, thread_id),
+            )
+        else:
+            cur.execute(
+                "UPDATE chat_threads SET updated_at=NOW() WHERE id=%s",
+                (thread_id,),
+            )
+
+        conn.commit()
+        cur.close()
+
+    return {"ok": True}

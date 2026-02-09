@@ -3,7 +3,7 @@ import "../assets/css/chat.css";
 
 function ChatWindowPrivate({ sidebarOpen }) {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Bonjour 👋🏻 Je suis votre assistant SmartIA." }
+    { role: "assistant", content: "Bonjour 👋🏻 Je suis votre assistant SmartIA, en quoi puis-je vous aider aujourd’hui ?" }
   ]);
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
