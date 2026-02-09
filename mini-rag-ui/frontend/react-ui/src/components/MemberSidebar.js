@@ -2,7 +2,16 @@ import { useAuth } from "../auth/AuthContext";
 import "../assets/css/sidebar.css";
 import "../assets/css/layout.css";
 
-export default function MemberSidebar({ open, onClose }) {
+export default function MemberSidebar({
+  open,
+  onClose,
+  threads = [],
+  activeThreadId,
+  onNewChat,
+  onSearch,
+  onSelectThread,
+  onRenameThread,
+}) {
   const { logout } = useAuth();
 
   return (
@@ -13,14 +22,32 @@ export default function MemberSidebar({ open, onClose }) {
       </div>
 
       <div className="sidebar-top">
-        <button className="sidebar-btn">✍️ Nouveau chat</button>
-        <button className="sidebar-btn ghost">🔍 Rechercher chat</button>
+        <button className="sidebar-btn" onClick={onNewChat}>✍️ Nouveau chat</button>
+        <input
+          className="sidebar-search"
+          placeholder="🔍 Rechercher chat"
+          onChange={(e) => onSearch(e.target.value)}
+        />
       </div>
 
       <div className="sidebar-section-title">Vos chats</div>
       <div className="sidebar-list">
-        <button className="sidebar-btn ghost">Conversation 1</button>
-        <button className="sidebar-btn ghost">Conversation 2</button>
+        {threads.map((t) => (
+          <div key={t.id} className={`thread-row ${activeThreadId === t.id ? "active" : ""}`}>
+            <button className="thread-title-btn" onClick={() => onSelectThread(t.id)}>
+              {t.title}
+            </button>
+            <button
+              className="thread-edit-btn"
+              onClick={() => {
+                const next = prompt("Nouveau titre", t.title);
+                if (next && next.trim()) onRenameThread(t.id, next.trim());
+              }}
+            >
+              ✏️
+            </button>
+          </div>
+        ))}
       </div>
 
       <div className="sidebar-bottom">
