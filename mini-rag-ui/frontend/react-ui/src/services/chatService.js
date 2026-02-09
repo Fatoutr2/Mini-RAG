@@ -33,17 +33,19 @@ export async function renameThread(threadId, title) {
   });
 
   if (!res.ok) {
-    let detail = "Impossible de renommer";
+    let message = "Impossible de renommer";
     try {
       const data = await res.json();
-      detail = data?.detail || detail;
+      message =
+        data?.detail ||
+        data?.message ||
+        (typeof data === "string" ? data : JSON.stringify(data));
     } catch (_) {}
-    throw new Error(detail);
+    throw new Error(message);
   }
 
   return res.json();
 }
-
 
 export async function getMessages(threadId) {
   const res = await fetch(`${API_BASE}/conversations/${threadId}/messages`, {
