@@ -15,25 +15,15 @@ export default function AdminPage() {
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [searchValue, setSearchValue] = useState("");
 
-  // Optionnel: état pour ouvrir vos panneaux admin
-  const [adminPanel, setAdminPanel] = useState(null); // "access" | "members" | "admins" | null
-
   const refreshThreads = async (search = "") => {
-    try {
-      const data = await listThreads(search);
-      setThreads(data);
+    const data = await listThreads(search);
+    setThreads(data);
 
-      // si aucun thread actif, prendre le plus récent
-      if (!activeThreadId && data.length > 0) {
-        setActiveThreadId(data[0].id);
-      }
-
-      // si thread actif supprimé/absent après filtre, fallback
-      if (activeThreadId && !data.some((t) => t.id === activeThreadId)) {
-        setActiveThreadId(data.length ? data[0].id : null);
-      }
-    } catch (err) {
-      console.error("Erreur chargement threads:", err);
+    if (!activeThreadId && data.length > 0) {
+      setActiveThreadId(data[0].id);
+    }
+    if (activeThreadId && !data.some((t) => t.id === activeThreadId)) {
+      setActiveThreadId(data.length ? data[0].id : null);
     }
   };
 
@@ -43,14 +33,10 @@ export default function AdminPage() {
   }, []);
 
   const handleNewChat = async () => {
-    try {
-      const newThread = await createThread();
-      setThreads((prev) => [newThread, ...prev]);
-      setActiveThreadId(newThread.id);
-      setSidebarOpen(false); // pratique sur mobile
-    } catch (err) {
-      console.error("Erreur création thread:", err);
-    }
+    const t = await createThread();
+    setThreads((prev) => [t, ...prev]);
+    setActiveThreadId(t.id);
+    setSidebarOpen(false);
   };
 
   const handleSearch = async (value) => {
@@ -58,26 +44,10 @@ export default function AdminPage() {
     await refreshThreads(value);
   };
 
-  const handleSelectThread = (threadId) => {
-    setActiveThreadId(threadId);
-    setSidebarOpen(false); // pratique sur mobile
+  const handleRename = async (threadId, title) => {
+    const updated = await renameThread(threadId, title);
+    setThreads((prev) => prev.map((t) => (t.id === threadId ? updated : t)));
   };
-
-  const handleRenameThread = async (threadId, title) => {
-    try {
-      const updated = await renameThread(threadId, title);
-      setThreads((prev) =>
-        prev.map((t) => (t.id === threadId ? { ...t, ...updated } : t))
-      );
-    } catch (err) {
-      console.error("Erreur renommage:", err);
-    }
-  };
-
-  // Callbacks boutons admin
-  const handleOpenAccess = () => setAdminPanel("access");
-  const handleOpenMembers = () => setAdminPanel("members");
-  const handleOpenAdmins = () => setAdminPanel("admins");
 
   return (
     <div className="app-layout">
@@ -91,11 +61,11 @@ export default function AdminPage() {
           activeThreadId={activeThreadId}
           onNewChat={handleNewChat}
           onSearch={handleSearch}
-          onSelectThread={handleSelectThread}
-          onRenameThread={handleRenameThread}
-          onOpenAccess={handleOpenAccess}
-          onOpenMembers={handleOpenMembers}
-          onOpenAdmins={handleOpenAdmins}
+          onSelectThread={setActiveThreadId}
+          onRenameThread={handleRename}
+          onOpenAccess={() => console.log("Accès")}
+          onOpenMembers={() => console.log("Membres")}
+          onOpenAdmins={() => console.log("Admins")}
         />
 
         <ChatWindowPrivate
@@ -104,19 +74,6 @@ export default function AdminPage() {
           onThreadAutoTitleRefresh={() => refreshThreads(searchValue)}
         />
       </div>
-
-      {/* Optionnel: placeholder visuel pour vos panneaux admin */}
-      {adminPanel && (
-        <div style={{ position: "fixed", right: 20, bottom: 20, background: "#222", color: "#fff", padding: 12, borderRadius: 8 }}>
-          Panneau admin actif : <strong>{adminPanel}</strong>
-          <button
-            style={{ marginLeft: 10 }}
-            onClick={() => setAdminPanel(null)}
-          >
-            Fermer
-          </button>
-        </div>
-      )}
     </div>
   );
 }

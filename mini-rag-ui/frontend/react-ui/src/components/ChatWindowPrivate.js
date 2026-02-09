@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../assets/css/chat.css";
+import { getMessages, sendMessage } from "../services/chatService";
 
-function ChatWindowPrivate({ sidebarOpen }) {
+function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefresh }) {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Bonjour 👋🏻 Je suis votre assistant SmartIA, en quoi puis-je vous aider aujourd’hui ?" }
+    { role: "assistant", content: "Bonjour 👋 En quoi puis-je vous aider aujourd’hui ?" }
   ]);
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
@@ -11,43 +12,34 @@ function ChatWindowPrivate({ sidebarOpen }) {
 
   const messagesEndRef = useRef(null);
 
-  const endpoint = "http://127.0.0.1:8000/query";
-
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("token")}`
-  };
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    fetch("http://127.0.0.1:8000/conversations/me", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const history = data.flatMap((c) => [
-          { role: "user", content: c.question },
-          { role: "assistant", content: c.answer }
-        ]);
-        setMessages((prev) => [...prev, ...history]);
-      })
-      .catch(() => {});
-  }, []);
+    const load = async () => {
+      if (!activeThreadId) {
+        setMessages([{ role: "assistant", content: "Bonjour 👋 En quoi puis-je vous aider aujourd’hui ?" }]);
+        return;
+      }
+      try {
+        setError("");
+        const data = await getMessages(activeThreadId);
+        if (!data.length) {
+          setMessages([{ role: "assistant", content: "Bonjour 👋 En quoi puis-je vous aider aujourd’hui ?" }]);
+        } else {
+          setMessages(data.map((m) => ({ role: m.role, content: m.content })));
+        }
+      } catch (err) {
+        setError(err.message || "Impossible de charger les messages");
+      }
+    };
+    load();
+  }, [activeThreadId]);
 
   const handleSend = async () => {
     const text = question.trim();
-    if (!text || loading) return;
-
-    if (!localStorage.getItem("token")) {
-      setError("Connexion requise.");
-      return;
-    }
+    if (!text || loading || !activeThreadId) return;
 
     setMessages((prev) => [...prev, { role: "user", content: text }]);
     setQuestion("");
@@ -55,22 +47,14 @@ function ChatWindowPrivate({ sidebarOpen }) {
     setError("");
 
     try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ question: text })
-      });
+      const data = await sendMessage(activeThreadId, text);
+      setMessages((prev) => [...prev, { role: "assistant", content: data.answer || "" }]);
 
-      if (!res.ok) throw new Error("Erreur serveur");
-
-      const data = await res.json();
-
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.answer }
-      ]);
+      if (onThreadAutoTitleRefresh) {
+        onThreadAutoTitleRefresh();
+      }
     } catch (err) {
-      setError(err.message || "Erreur");
+      setError(err.message || "Erreur serveur");
     } finally {
       setLoading(false);
     }
@@ -104,12 +88,13 @@ function ChatWindowPrivate({ sidebarOpen }) {
       <div className="chat-input-area">
         <textarea
           rows={1}
-          placeholder="Envoyer un message..."
+          placeholder={activeThreadId ? "Envoyer un message..." : "Créez un nouveau chat d'abord..."}
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={onKeyDown}
+          disabled={!activeThreadId}
         />
-        <button onClick={handleSend} disabled={loading}>➤</button>
+        <button onClick={handleSend} disabled={loading || !activeThreadId}>➤</button>
       </div>
 
       {error && <p className="chat-error">{error}</p>}
