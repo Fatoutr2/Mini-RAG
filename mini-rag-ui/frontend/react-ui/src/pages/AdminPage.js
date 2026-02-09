@@ -14,6 +14,7 @@ export default function AdminPage() {
   const [threads, setThreads] = useState([]);
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [searchValue, setSearchValue] = useState("");
+  const [creatingThread, setCreatingThread] = useState(false);
 
   const refreshThreads = async (search = "") => {
     const data = await listThreads(search);
@@ -32,11 +33,19 @@ export default function AdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleNewChat = async () => {
-    const t = await createThread();
-    setThreads((prev) => [t, ...prev]);
-    setActiveThreadId(t.id);
-    setSidebarOpen(false);
+  const handleNewChat = async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+
+    if (creatingThread) return;      // garde anti double-clic
+    setCreatingThread(true);
+    try {
+      const t = await createThread();
+      setThreads((prev) => [t, ...prev]);
+      setActiveThreadId(t.id);
+    } finally {
+      setCreatingThread(false);
+    }
   };
 
   const handleSearch = async (value) => {

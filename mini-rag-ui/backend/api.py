@@ -86,12 +86,6 @@ def create_conversation(user=Depends(get_current_user)):
     return create_thread(user["user_id"], "Nouveau chat")
 
 
-#@app.get("/conversations/me")
-#def get_my_threads(search: str = FastQuery(default=""), user=Depends(get_current_user)):
-#    if user["role"] == "visitor":
-#        raise HTTPException(403, "Connexion requise")
-#   return list_threads(user["user_id"], search=search)
-
 
 @app.get("/conversations/{thread_id}/messages")
 def get_messages(thread_id: int, user=Depends(get_current_user)):

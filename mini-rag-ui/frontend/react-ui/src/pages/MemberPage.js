@@ -10,6 +10,7 @@ export default function MemberPage() {
   const [threads, setThreads] = useState([]);
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [search, setSearch] = useState("");
+  const [creatingThread, setCreatingThread] = useState(false);
 
   const refreshThreads = async (q = "") => {
     const data = await listThreads(q);
@@ -19,10 +20,19 @@ export default function MemberPage() {
 
   useEffect(() => { refreshThreads(""); }, []);
 
-  const handleNewChat = async () => {
-    const t = await createThread();
-    setThreads((prev) => [t, ...prev]);
-    setActiveThreadId(t.id);
+  const handleNewChat = async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+
+    if (creatingThread) return;      // garde anti double-clic
+    setCreatingThread(true);
+    try {
+      const t = await createThread();
+      setThreads((prev) => [t, ...prev]);
+      setActiveThreadId(t.id);
+    } finally {
+      setCreatingThread(false);
+    }
   };
 
   const handleRename = async (id, title) => {

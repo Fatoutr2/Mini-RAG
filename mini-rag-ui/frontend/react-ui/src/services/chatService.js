@@ -33,17 +33,33 @@ export async function renameThread(threadId, title) {
   });
 
   if (!res.ok) {
-    let message = "Impossible de renommer";
+    let msg = "Impossible de renommer";
     try {
       const data = await res.json();
-      message =
+      msg =
         data?.detail ||
         data?.message ||
         (typeof data === "string" ? data : JSON.stringify(data));
     } catch (_) {}
-    throw new Error(message);
+    throw new Error(msg);
   }
 
+  return res.json();
+}
+
+export async function deleteThread(threadId) {
+  const res = await fetch(`${API_BASE}/conversations/${threadId}`, {
+    method: "DELETE",
+    headers: headers(),
+  });
+  if (!res.ok) {
+    let msg = "Impossible de supprimer";
+    try {
+      const data = await res.json();
+      msg = data?.detail || data?.message || msg;
+    } catch (_) {}
+    throw new Error(msg);
+  }
   return res.json();
 }
 
