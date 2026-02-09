@@ -66,109 +66,121 @@ Mini-RAG/
             ├── routes/
             ├── services/
             └── assets/css/
-
+```
 
 ---
 
 ## ⚙️ Prérequis
-Python 3.11+
 
+- Python 3.11+
 - Node.js 18+
+- PostgreSQL
+- pip / venv
 
-PostgreSQL
-
-pip / venv
-
---- 
-
+---
 
 ## 🔧 Installation backend
+
+```bash
 cd mini-rag-ui
 python -m venv .venv
-source .venv/bin/activate   # Linux/Mac
-# .venv\Scripts\activate    # Windows
+# source .venv/bin/activate   # Linux/Mac
+ .venv\Scripts\activate    # Windows
 pip install -r requirements.txt
-Variables d’environnement (exemple)
+```
+
+---
+
+## Variables d’environnement (exemple)
+```bash
 export OPENROUTER_API_KEY="..."
+```
 # optionnel selon votre setup
+```bash
 export DATABASE_URL="postgresql://postgres:postgres123@localhost:5432/rag-db"
-Lancer l’API
+```
+
+
+---
+
+## Lancer l’API
+```bash
 uvicorn backend.api:app --reload
+```
 API : http://127.0.0.1:8000
 
 ---
 
-
 ## 💻 Installation frontend
+```bash
 cd mini-rag-ui/frontend/react-ui
 npm install
 npm start
 Frontend : http://localhost:3000
+```
 
 ---
 
-
 ## 🔐 Auth et rôles
-POST /auth/register : crée un compte member
+- POST /auth/register : crée un compte member
 
-POST /auth/login : retourne access_token JWT
+- POST /auth/login : retourne access_token JWT
 
-Routes frontend protégées:
+- Routes frontend protégées :
 
-/member → ProtectedRoute
+  - /member → ProtectedRoute
 
-/admin, /admin/access, /admin/members, /admin/admins → AdminRoute
+  - /admin, /admin/access, /admin/members, /admin/admins → AdminRoute
+
 
 ---
 
 ## 🧭 Routes frontend
-/ : landing / auth
+- / : landing / auth
 
-/member : chat member
+- /member : chat member
 
-/admin : chat admin
+- /admin : chat admin
 
-/admin/access : création + gestion utilisateurs
+- /admin/access : création + gestion utilisateurs
 
-/admin/members : listing membres
+- /admin/members : listing membres
 
-/admin/admins : listing admins
+- /admin/admins : listing admins
 
 ---
 
 ## 🧩 Endpoints backend (principaux)
-Public
-GET /public/company-info
+- Public
+  - GET /public/company-info
 
-POST /rag/visitor
+  - POST /rag/visitor
 
-Auth
-POST /auth/register
+- Auth
+  - POST /auth/register
 
-POST /auth/login
+  - POST /auth/login
 
-Chat Threads
-POST /conversations
+- Chat Threads
+  - POST /conversations
 
-GET /conversations/me
+  - GET /conversations/me
 
-GET /conversations/{thread_id}/messages
+  - GET /conversations/{thread_id}/messages
 
-POST /conversations/{thread_id}/messages
+  - POST /conversations/{thread_id}/messages
 
-PATCH /conversations/{thread_id}
+  - PATCH /conversations/{thread_id}
 
-DELETE /conversations/{thread_id}
+  - DELETE /conversations/{thread_id}
 
-Admin Users
-GET /auth/admin/users
+- Admin Users
+  - GET /auth/admin/users
 
-POST /auth/admin/users
+  - POST /auth/admin/users
 
-PUT /auth/admin/users/{user_id}
+  - PUT /auth/admin/users/{user_id}
 
-PUT /auth/admin/users/{user_id}/role?new_role=...
+  - PUT /auth/admin/users/{user_id}/role?new_role=...
 
-DELETE /auth/admin/users/{user_id}
-
----
+  - DELETE /auth/admin/users/{user_id}
