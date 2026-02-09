@@ -54,6 +54,8 @@ export default function AdminSidebar({
         />
       </div>
 
+      <div className="sidebar-divider" />
+
       <div className="sidebar-section-title">Vos chats</div>
       <div className="sidebar-list">
         {threads.map((t) => (
@@ -99,6 +101,8 @@ export default function AdminSidebar({
           </div>
         ))}
       </div>
+
+      <div className="sidebar-divider" />
 
       <ul className="admin-menu">
         <li>

@@ -46,6 +46,8 @@ export default function MemberSidebar({
         />
       </div>
 
+      <div className="sidebar-divider" />
+
       <div className="sidebar-section-title">Vos chats</div>
       <div className="sidebar-list">
         {threads.map((t) => (
