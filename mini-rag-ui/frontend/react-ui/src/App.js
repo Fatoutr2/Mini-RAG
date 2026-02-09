@@ -114,6 +114,10 @@ import { Routes, Route } from "react-router-dom";
 import MemberPage from "./pages/MemberPage";
 import AdminPage from "./pages/AdminPage";
 import Index from "./pages/Index";
+import AccessPage from "./pages/AccessPage";
+import Members from "./pages/Members";
+import Admins from "./pages/Admins";
+
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminRoute from "./routes/AdminRoute";
 
@@ -139,7 +143,37 @@ function App() {
           </AdminRoute>
         }
       />
+
+      <Route
+        path="/admin/access"
+        element={
+          <AdminRoute>
+            <AccessPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/members"
+        element={
+          <AdminRoute>
+            <Members />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/admins"
+        element={
+          <AdminRoute>
+            <Admins />
+          </AdminRoute>
+        }
+      />
+
     </Routes>
+
+    
   );
 }
 

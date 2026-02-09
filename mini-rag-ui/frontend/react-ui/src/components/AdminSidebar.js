@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useLocation, useNavigate } from "react";
 import { useAuth } from "../auth/AuthContext";
 import "../assets/css/sidebar.css";
 import "../assets/css/layout.css";
@@ -21,6 +21,10 @@ export default function AdminSidebar({
   const { logout } = useAuth();
   const [menuOpenFor, setMenuOpenFor] = useState(null);
   const menuRef = useRef(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isActive = (path) => location.pathname === path;
 
   useEffect(() => {
     const onDocClick = (e) => {
@@ -96,10 +100,32 @@ export default function AdminSidebar({
       </div>
 
       <ul className="admin-menu">
-        <li><button onClick={onOpenAccess}>🔑 Accès</button></li>
-        <li><button onClick={onOpenMembers}>👤 Membres</button></li>
-        <li><button onClick={onOpenAdmins}>🛡 Admins</button></li>
+        <li>
+          <button
+            className={`admin-link ${isActive("/admin/access") ? "active" : ""}`}
+            onClick={() => navigate("/admin/access")}
+          >
+            🔑 Accès
+          </button>
+        </li>
+        <li>
+          <button
+            className={`admin-link ${isActive("/admin/members") ? "active" : ""}`}
+            onClick={() => navigate("/admin/members")}
+          >
+            👤 Membres
+          </button>
+        </li>
+        <li>
+          <button
+            className={`admin-link ${isActive("/admin/admins") ? "active" : ""}`}
+            onClick={() => navigate("/admin/admins")}
+          >
+            🛡 Admins
+          </button>
+        </li>
       </ul>
+
 
       <div className="sidebar-bottom">
         <button className="logout" onClick={logout}>Déconnexion</button>
