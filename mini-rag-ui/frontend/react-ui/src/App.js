@@ -114,15 +114,34 @@ import { Routes, Route } from "react-router-dom";
 import MemberPage from "./pages/MemberPage";
 import AdminPage from "./pages/AdminPage";
 import Index from "./pages/Index";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import AdminRoute from "./routes/AdminRoute";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
-      <Route path="/member" element={<MemberPage />} />
-      <Route path="/admin" element={<AdminPage />} />
+
+      <Route
+        path="/member"
+        element={
+          <ProtectedRoute>
+            <MemberPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminPage />
+          </AdminRoute>
+        }
+      />
     </Routes>
   );
 }
 
 export default App;
+

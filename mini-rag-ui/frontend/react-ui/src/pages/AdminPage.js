@@ -12,7 +12,7 @@ export default function AdminPage() {
     <div className="app-layout">
 
       {/* HEADER GLOBAL */}
-      <Navbar toggle={() => setSidebarOpen(!sidebarOpen)} />
+      <Navbar role="admin" toggle={() => setSidebarOpen(!sidebarOpen)} />
 
       {/* CONTENU */}
       <div className="content-row">
@@ -21,7 +21,7 @@ export default function AdminPage() {
           onClose={() => setSidebarOpen(false)}
         />
 
-        <ChatWindowPrivate />
+        <ChatWindowPrivate sidebarOpen={sidebarOpen} />
       </div>
 
     </div>

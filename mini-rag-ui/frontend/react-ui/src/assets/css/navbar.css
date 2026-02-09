@@ -1,29 +1,43 @@
 .navbar {
-  height: 50px;
-  background: #696767;
-  color: white;
+  height: 56px;
+  background: #202123;
+  color: #ececf1;
   display: flex;
   align-items: center;
-  padding: 0 1rem;
-  gap: 1rem;
+  justify-content: space-between;
+  padding: 0 14px;
+  border-bottom: 1px solid #2f303a;
 }
 
-/* ☰ */
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .menu-btn {
-  background: none;
-  color: white;
+  background: transparent;
+  color: #ececf1;
   font-size: 20px;
   border: none;
   cursor: pointer;
-  display: none; /* caché par défaut */
+  display: none;
 }
 
-.nav-title {
-  font-weight: bold;
+.nav-brand {
+  font-weight: 700;
+  letter-spacing: 0.2px;
   cursor: pointer;
 }
 
-/* PETIT ÉCRAN */
+.role-badge {
+  background: #2a2b32;
+  border: 1px solid #3a3b46;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
 @media (max-width: 900px) {
   .menu-btn {
     display: block;

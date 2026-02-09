@@ -18,12 +18,10 @@ function ChatWindowPrivate({ sidebarOpen }) {
     Authorization: `Bearer ${localStorage.getItem("token")}`
   };
 
-  
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // 🔹 Charger historique (member + admin)
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -31,53 +29,57 @@ function ChatWindowPrivate({ sidebarOpen }) {
     fetch("http://127.0.0.1:8000/conversations/me", {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
-      .then(data => {
-        const history = data.flatMap(c => ([
+      .then((res) => res.json())
+      .then((data) => {
+        const history = data.flatMap((c) => [
           { role: "user", content: c.question },
           { role: "assistant", content: c.answer }
-        ]));
-        setMessages(prev => [...prev, ...history]);
+        ]);
+        setMessages((prev) => [...prev, ...history]);
       })
       .catch(() => {});
   }, []);
 
-  // 🔹 Envoyer question
-  const askRAG = async () => {
-    if (!question.trim()) return;
+  const handleSend = async () => {
+    const text = question.trim();
+    if (!text || loading) return;
 
     if (!localStorage.getItem("token")) {
       setError("Connexion requise.");
       return;
     }
 
-    const userMessage = { role: "user", content: question };
-    setMessages(prev => [...prev, userMessage]);
-
-    setLoading(true);
+    setMessages((prev) => [...prev, { role: "user", content: text }]);
     setQuestion("");
+    setLoading(true);
     setError("");
 
     try {
       const res = await fetch(endpoint, {
         method: "POST",
         headers,
-        body: JSON.stringify({ question })
+        body: JSON.stringify({ question: text })
       });
 
       if (!res.ok) throw new Error("Erreur serveur");
 
       const data = await res.json();
 
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         { role: "assistant", content: data.answer }
       ]);
-
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Erreur");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
   };
 
@@ -85,22 +87,29 @@ function ChatWindowPrivate({ sidebarOpen }) {
     <div className={`chat-wrapper ${sidebarOpen ? "sidebar-open" : ""}`}>
       <div className="chat-messages">
         {messages.map((msg, i) => (
-          <div key={i} className={`chat-bubble ${msg.role}`}>
-            {msg.content}
+          <div key={i} className={`message-row ${msg.role === "user" ? "right" : "left"}`}>
+            <div className={`chat-bubble ${msg.role}`}>{msg.content}</div>
           </div>
         ))}
-        {loading && <div className="chat-bubble assistant">⏳ Réponse en cours...</div>}
+
+        {loading && (
+          <div className="message-row left">
+            <div className="chat-bubble assistant">⏳ Réponse en cours...</div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
       <div className="chat-input-area">
-        <input
-          placeholder="Posez votre question…"
+        <textarea
+          rows={1}
+          placeholder="Envoyer un message..."
           value={question}
-          onChange={e => setQuestion(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && askRAG()}
+          onChange={(e) => setQuestion(e.target.value)}
+          onKeyDown={onKeyDown}
         />
-        <button onClick={askRAG}>➤</button>
+        <button onClick={handleSend} disabled={loading}>➤</button>
       </div>
 
       {error && <p className="chat-error">{error}</p>}

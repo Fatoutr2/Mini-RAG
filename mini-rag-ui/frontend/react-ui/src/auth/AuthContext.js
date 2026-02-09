@@ -5,7 +5,11 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate(); // ✅ marche parce que BrowserRouter est au-dessus
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    return token ? { token, role } : null;
+  });
 
   const login = (token, role) => {
     localStorage.setItem("token", token);

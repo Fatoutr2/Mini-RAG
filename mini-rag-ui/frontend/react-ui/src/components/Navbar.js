@@ -1,15 +1,18 @@
 import "../assets/css/navbar.css";
 
-export default function Navbar({ sidebarOpen, setSidebarOpen, toggle }) {
+export default function Navbar({ toggle, role = "member" }) {
   return (
-    <div className="navbar">
-      <button className="menu-btn" onClick={toggle}>☰</button>
-      <div
-        className="nav-title"
-        onClick={() => window.location.reload()}
-      >
-        (•‿•) SmartIA
+    <header className="navbar">
+      <div className="nav-left">
+        <button className="menu-btn" onClick={toggle}>☰</button>
+        <div className="nav-brand" onClick={() => window.location.reload()}>
+          (•‿•) SmartIA
+        </div>
       </div>
-    </div>
+
+      <div className="nav-right">
+        <span className="role-badge">{role === "admin" ? "Admin" : "Membre"}</span>
+      </div>
+    </header>
   );
 }

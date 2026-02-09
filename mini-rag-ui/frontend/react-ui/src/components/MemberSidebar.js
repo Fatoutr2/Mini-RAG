@@ -7,31 +7,25 @@ export default function MemberSidebar({ open, onClose }) {
 
   return (
     <aside className={`sidebar ${open ? "open" : ""}`}>
-
-      {/* MOBILE CLOSE */}
       <div className="sidebar-header">
-        <span className="close-btn">(•‿•)</span>
+        <span>(•‿•)</span>
         <button className="close-btn" onClick={onClose}>✕</button>
       </div>
-      
+
       <div className="sidebar-top">
-        <a className="new-chat">✍️ Nouveau chat</a>
-        <a className="new-chat">🔍 Rechercher chat</a>
+        <button className="sidebar-btn">✍️ Nouveau chat</button>
+        <button className="sidebar-btn ghost">🔍 Rechercher chat</button>
       </div>
 
-      <div>
-        <span className="chat-link">Vos chats ›</span>
+      <div className="sidebar-section-title">Vos chats</div>
+      <div className="sidebar-list">
+        <button className="sidebar-btn ghost">Conversation 1</button>
+        <button className="sidebar-btn ghost">Conversation 2</button>
       </div>
-
-      <div className="sidebar-spacer" />
 
       <div className="sidebar-bottom">
-        <button className="logout" onClick={logout}>
-          Déconnexion
-        </button>
+        <button className="logout" onClick={logout}>Déconnexion</button>
       </div>
-
     </aside>
   );
 }
-

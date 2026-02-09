@@ -11,7 +11,7 @@ export default function MemberPage() {
     <div className="app-layout">
 
       {/* HEADER GLOBAL */}
-      <Navbar toggle={() => setSidebarOpen(!sidebarOpen)} />
+      <Navbar role="member" toggle={() => setSidebarOpen(!sidebarOpen)} />
 
       {/* CONTENU */}
       <div className="content-row">
@@ -20,7 +20,7 @@ export default function MemberPage() {
           onClose={() => setSidebarOpen(false)}
         />
 
-        <ChatWindowPrivate />
+        <ChatWindowPrivate sidebarOpen={sidebarOpen} />
       </div>
 
     </div>

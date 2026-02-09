@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import "../assets/css/sidebar.css";
 import "../assets/css/layout.css";
@@ -8,36 +7,31 @@ export default function AdminSidebar({ open, onClose }) {
 
   return (
     <aside className={`sidebar ${open ? "open" : ""}`}>
-
-      {/* MOBILE CLOSE */}
       <div className="sidebar-header">
-        <span className="close-btn">(•‿•)</span>
+        <span>(•‿•)</span>
         <button className="close-btn" onClick={onClose}>✕</button>
       </div>
-      
+
       <div className="sidebar-top">
-        <a className="new-chat">✍️ Nouveau chat</a>
-        <a className="new-chat">🔍 Rechercher chat</a>
-      </div>
-      
-      <div>
-        <span className="chat-link">Vos chats ›</span>
+        <button className="sidebar-btn">✍️ Nouveau chat</button>
+        <button className="sidebar-btn ghost">🔍 Rechercher chat</button>
       </div>
 
-      <div>
-        <ul className="admin-menu">
-          <li><button>🔑 Accès</button></li>
-          <li><button>👤 Membres</button></li>
-          <li><button>🛡 Admins</button></li>
-        </ul>
+      <div className="sidebar-section-title">Vos chats</div>
+      <div className="sidebar-list">
+        <button className="sidebar-btn ghost">Conversation A</button>
+        <button className="sidebar-btn ghost">Conversation B</button>
       </div>
+
+      <ul className="admin-menu">
+        <li><button>🔑 Accès</button></li>
+        <li><button>👤 Membres</button></li>
+        <li><button>🛡 Admins</button></li>
+      </ul>
 
       <div className="sidebar-bottom">
-        <button className="logout" onClick={logout}>
-          Déconnexion
-        </button>
+        <button className="logout" onClick={logout}>Déconnexion</button>
       </div>
-
     </aside>
   );
 }
