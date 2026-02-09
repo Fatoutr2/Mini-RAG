@@ -1,0 +1,84 @@
+/* === MODAL BACKDROP === */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+/* === MODAL BOX === */
+.modal-content {
+  background: white;
+  width: 100%;
+  max-width: 550px;
+  height: 80%;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* CLOSE */
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* TITLE */
+.modal-content h3 {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+/* INPUTS */
+.modal-content input {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #cbd5f5;
+  font-size: 14px;
+  outline: none;
+}
+
+.modal-content input:focus {
+  border-color: #2563eb;
+}
+
+/* ERROR */
+.error {
+  color: #dc2626;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* BUTTONS */
+.hero-btn {
+  background: #1e3f86;
+  width: 45%;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  align-self: center;
+}
+
+.login-btn {
+  background: transparent;
+  border: none;
+  color: #33363a;
+  cursor: pointer;
+  font-size: 14px;
+}

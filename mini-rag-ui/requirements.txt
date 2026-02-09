@@ -10,6 +10,10 @@ openai
 # Data & utils
 numpy
 pandas
+bcrypt
+pydantic
+jwt
+passlib
 
 # File loaders
 PyPDF2

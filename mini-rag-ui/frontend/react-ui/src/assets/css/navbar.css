@@ -1,0 +1,31 @@
+.navbar {
+  height: 50px;
+  background: #696767;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 1rem;
+}
+
+/* ☰ */
+.menu-btn {
+  background: none;
+  color: white;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+  display: none; /* caché par défaut */
+}
+
+.nav-title {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* PETIT ÉCRAN */
+@media (max-width: 900px) {
+  .menu-btn {
+    display: block;
+  }
+}

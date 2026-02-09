@@ -1,0 +1,161 @@
+/* === SIDEBAR BASE === */
+.sidebar {
+  width: 65%;
+  height: 100vh;
+  background: #242424;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  transition: transform 0.3s ease;
+  top: 0;
+  left: 0;
+  max-width: 250px;
+}
+  .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+  }
+
+.sidebar-header {
+  display: none; /* caché PAR DÉFAUT (desktop) */
+}
+
+/* === TOP === */
+.sidebar-top {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.new-chat {
+  width: 100%;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  align-self: left;
+}
+
+.chat-link {
+  font-size: 14px;
+  opacity: 0.8;
+  cursor: pointer;
+  color: white;
+  
+}
+
+/* === CONTENT (ADMIN MENU) === */
+.sidebar-content {
+  margin-top: 14px;
+}
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+.sidebar div {
+  margin-bottom: 40px;
+  left: auto;
+}
+.sidebar a {
+  padding-left: 0;
+  padding: 0px;
+  left: auto;
+  cursor: pointer;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  margin-bottom: 15px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.sidebar li:hover {
+  color: #2d2d2e;
+}
+
+/* ADMIN MENU */
+.admin-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-menu li button {
+  width: 100%;
+  background: none;
+  border: none;
+  color: white;
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.admin-menu li button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* === PUSH BOTTOM === */
+.sidebar-bottom {
+  margin-top: auto;   /* 🔑 CLEF : pousse en bas */
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.logout {
+  background: none;
+  border: none;
+  color: #f87171;
+  cursor: pointer;
+  
+}
+
+
+/* ================= MOBILE ================= */
+@media (max-width: 900px) {
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 65%;
+    max-width: 250px;
+    height: 100vh;
+    background: #242424;
+    z-index: 1001;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    border-radius: 0%;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Header X visible UNIQUEMENT en mobile */
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+  }
+}
+
+

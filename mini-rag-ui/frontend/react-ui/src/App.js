@@ -110,29 +110,19 @@ function App() {
 
 export default App;
 */
-
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminRouter from "./routes/AdminRouter";
+import { Routes, Route } from "react-router-dom";
+import MemberPage from "./pages/MemberPage";
+import AdminPage from "./pages/AdminPage";
+import Index from "./pages/Index";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route
-          path="/admin"
-          element={
-            <AdminRouter>
-              <AdminDashboard />
-            </AdminRouter>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/member" element={<MemberPage />} />
+      <Route path="/admin" element={<AdminPage />} />
+    </Routes>
   );
 }
 
 export default App;
-

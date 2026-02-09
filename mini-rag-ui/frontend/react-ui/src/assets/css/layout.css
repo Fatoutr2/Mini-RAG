@@ -1,0 +1,62 @@
+/* ================= ROOT ================= */
+.app-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= NAVBAR ================= */
+/*.navbar {
+  height: 50px;
+  background: #242424;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  flex-shrink: 0;
+  z-index: 1002;
+}*/
+
+/* ================= CONTENT ================= */
+.content-row {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+  width: 260px;
+  background: #242424;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= CHAT ================= */
+.chat-wrapper {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 900px) {
+
+  .content-row {
+    position: relative;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 50px; /* sous le navbar */
+    left: 0;
+    height: calc(100vh - 50px);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1001;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}

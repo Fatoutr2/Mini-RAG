@@ -53,7 +53,7 @@ def load_excel_as_chunks(path: str) -> List[Dict]:
 
             for _, row in df.iterrows():
                 # Exemple lisible pour le modèle
-                text = f"{row['Employé']} travaille comme {row['Rôle']} sur {row['Projet']} en utilisant {row['Technologie principale']}"
+                text = f"{row['Employé']} travaille comme {row['Rôle']} sur le projet {row['Projet']} en utilisant {row['Technologie principale']}"
                 chunks.append({
                     "text": text,
                     "type": "excel",

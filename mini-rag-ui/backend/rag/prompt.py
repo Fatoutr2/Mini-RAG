@@ -1,7 +1,8 @@
 def build_prompt(context_chunks, question):
     context = "\n\n".join(
-        f"[{c['type']} | {c['source']}]\n{c['text']}"
+        f"[{c.get('type', 'doc')} | {c.get('source', 'unknown')}]\n{c.get('text', '')}"
         for c in context_chunks
+        if c.get("text")
     )
 
     return f"""
