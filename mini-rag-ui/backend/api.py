@@ -46,19 +46,10 @@ def query_rag(payload: Query, user=Depends(get_current_user)):
     return {"answer": answer}
 
 @app.get("/conversations/me")
-def get_my_conversations(user=Depends(get_current_user)):
-    """
-    Renvoie toutes les conversations du membre connecté
-    """
+def get_my_threads(search: str = FastQuery(default=""), user=Depends(get_current_user)):
     if user["role"] == "visitor":
         raise HTTPException(403, "Connexion requise")
-
-    history = get_history(user["user_id"])
-
-    return [
-        {"id": h.get("id"), "question": h["question"], "answer": h["answer"], "created_at": h.get("created_at")}
-        for h in history
-    ]
+    return list_threads(user["user_id"], search=search)
 
 
 # -------- ADMIN --------

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import MemberSidebar from "../components/MemberSidebar";
 import ChatWindowPrivate from "../components/ChatWindowPrivate";
-import { listThreads, createThread, renameThread } from "../services/chatService";
+import { listThreads, createThread, renameThread, deleteThread } from "../services/chatService";
 import "../assets/css/layout.css";
 
 export default function MemberPage() {
@@ -15,16 +15,22 @@ export default function MemberPage() {
   const refreshThreads = async (q = "") => {
     const data = await listThreads(q);
     setThreads(data);
-    if (!activeThreadId && data.length) setActiveThreadId(data[0].id);
+    setActiveThreadId((prevId) => {
+      if (!prevId && data.length) return data[0].id;
+      if (prevId && !data.some((t) => t.id === prevId)) return data.length ? data[0].id : null;
+      return prevId;
+    });
   };
 
-  useEffect(() => { refreshThreads(""); }, []);
+  useEffect(() => {
+    refreshThreads("");
+  }, []);
 
   const handleNewChat = async (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
+    if (creatingThread) return;
 
-    if (creatingThread) return;      // garde anti double-clic
     setCreatingThread(true);
     try {
       const t = await createThread();
@@ -38,6 +44,12 @@ export default function MemberPage() {
   const handleRename = async (id, title) => {
     const updated = await renameThread(id, title);
     setThreads((prev) => prev.map((t) => (t.id === id ? updated : t)));
+  };
+
+  const handleDelete = async (id) => {
+    await deleteThread(id);
+    setThreads((prev) => prev.filter((t) => t.id !== id));
+    setActiveThreadId((prevId) => (prevId === id ? null : prevId));
   };
 
   const handleSearch = (value) => {
@@ -55,11 +67,17 @@ export default function MemberPage() {
           threads={threads}
           activeThreadId={activeThreadId}
           onNewChat={handleNewChat}
+          creatingThread={creatingThread}
           onSearch={handleSearch}
           onSelectThread={setActiveThreadId}
           onRenameThread={handleRename}
+          onDeleteThread={handleDelete}
         />
-        <ChatWindowPrivate sidebarOpen={sidebarOpen} activeThreadId={activeThreadId} />
+        <ChatWindowPrivate
+          sidebarOpen={sidebarOpen}
+          activeThreadId={activeThreadId}
+          onThreadAutoTitleRefresh={() => refreshThreads(search)}
+        />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
-import { useState, useRef, useEffect } from "react";
 import "../assets/css/sidebar.css";
 import "../assets/css/layout.css";
 
@@ -9,14 +9,13 @@ export default function MemberSidebar({
   threads = [],
   activeThreadId,
   onNewChat,
+  creatingThread = false,
   onSearch,
   onSelectThread,
   onRenameThread,
   onDeleteThread,
-  onTogglePinThread, // (threadId, nextPinned)
 }) {
   const { logout } = useAuth();
-
   const [menuOpenFor, setMenuOpenFor] = useState(null);
   const menuRef = useRef(null);
 
@@ -37,7 +36,9 @@ export default function MemberSidebar({
       </div>
 
       <div className="sidebar-top">
-        <button className="sidebar-btn" onClick={onNewChat}>✍️ Nouveau chat</button>
+        <button className="sidebar-btn" onClick={onNewChat} disabled={creatingThread}>
+          {creatingThread ? "Création..." : "✍️ Nouveau chat"}
+        </button>
         <input
           className="sidebar-search"
           placeholder="🔍 Rechercher chat"
@@ -50,7 +51,6 @@ export default function MemberSidebar({
         {threads.map((t) => (
           <div key={t.id} className={`thread-row ${activeThreadId === t.id ? "active" : ""}`}>
             <button className="thread-title-btn" onClick={() => onSelectThread(t.id)}>
-              {t.pinned ? "📌 " : ""}
               {t.title}
             </button>
 
@@ -67,20 +67,19 @@ export default function MemberSidebar({
 
               {menuOpenFor === t.id && (
                 <div className="thread-dropdown">
-                  <button onClick={() => { onTogglePinThread?.(t.id, !t.pinned); setMenuOpenFor(null); }}>
-                    {t.pinned ? "Retirer épingle" : "Épingler le chat"}
-                  </button>
-                  <button onClick={() => {
-                    const next = prompt("Nouveau titre", t.title);
-                    if (next?.trim()) onRenameThread(t.id, next.trim());
-                    setMenuOpenFor(null);
-                  }}>
+                  <button
+                    onClick={() => {
+                      const next = prompt("Nouveau titre", t.title);
+                      if (next && next.trim()) onRenameThread(t.id, next.trim());
+                      setMenuOpenFor(null);
+                    }}
+                  >
                     Renommer
                   </button>
                   <button
                     className="danger"
                     onClick={() => {
-                      if (window.confirm("Supprimer ce chat ?")) onDeleteThread?.(t.id);
+                      if (window.confirm("Supprimer ce chat ?")) onDeleteThread(t.id);
                       setMenuOpenFor(null);
                     }}
                   >

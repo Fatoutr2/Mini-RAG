@@ -149,6 +149,7 @@
   font-size: 18px;
   line-height: 1;
 }
+
 .thread-more-btn:hover {
   background: #3b3b3b;
 }
@@ -157,11 +158,11 @@
   position: absolute;
   top: 28px;
   right: 0;
-  min-width: 170px;
+  min-width: 150px;
   background: #202020;
   border: 1px solid #3a3a3a;
   border-radius: 10px;
-  box-shadow: 0 8px 18px rgba(0,0,0,.35);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
   z-index: 1200;
   padding: 6px;
   display: flex;
@@ -187,10 +188,6 @@
 .thread-dropdown button.danger {
   color: #fca5a5;
 }
-.thread-dropdown button.danger:hover {
-  background: rgba(248, 113, 113, 0.12);
-}
-
 
 @media (max-width: 900px) {
   .sidebar {

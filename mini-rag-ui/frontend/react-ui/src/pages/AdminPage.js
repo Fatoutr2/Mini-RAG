@@ -6,6 +6,7 @@ import {
   listThreads,
   createThread,
   renameThread,
+  deleteThread,
 } from "../services/chatService";
 import "../assets/css/layout.css";
 
@@ -20,29 +21,28 @@ export default function AdminPage() {
     const data = await listThreads(search);
     setThreads(data);
 
-    if (!activeThreadId && data.length > 0) {
-      setActiveThreadId(data[0].id);
-    }
-    if (activeThreadId && !data.some((t) => t.id === activeThreadId)) {
-      setActiveThreadId(data.length ? data[0].id : null);
-    }
+    setActiveThreadId((prevId) => {
+      if (!prevId && data.length > 0) return data[0].id;
+      if (prevId && !data.some((t) => t.id === prevId)) return data.length ? data[0].id : null;
+      return prevId;
+    });
   };
 
   useEffect(() => {
     refreshThreads("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleNewChat = async (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
+    if (creatingThread) return;
 
-    if (creatingThread) return;      // garde anti double-clic
     setCreatingThread(true);
     try {
       const t = await createThread();
       setThreads((prev) => [t, ...prev]);
       setActiveThreadId(t.id);
+      setSidebarOpen(false);
     } finally {
       setCreatingThread(false);
     }
@@ -58,6 +58,12 @@ export default function AdminPage() {
     setThreads((prev) => prev.map((t) => (t.id === threadId ? updated : t)));
   };
 
+  const handleDelete = async (threadId) => {
+    await deleteThread(threadId);
+    setThreads((prev) => prev.filter((t) => t.id !== threadId));
+    setActiveThreadId((prevId) => (prevId === threadId ? null : prevId));
+  };
+
   return (
     <div className="app-layout">
       <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} />
@@ -69,9 +75,11 @@ export default function AdminPage() {
           threads={threads}
           activeThreadId={activeThreadId}
           onNewChat={handleNewChat}
+          creatingThread={creatingThread}
           onSearch={handleSearch}
           onSelectThread={setActiveThreadId}
           onRenameThread={handleRename}
+          onDeleteThread={handleDelete}
           onOpenAccess={() => console.log("Accès")}
           onOpenMembers={() => console.log("Membres")}
           onOpenAdmins={() => console.log("Admins")}
