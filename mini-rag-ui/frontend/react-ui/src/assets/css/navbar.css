@@ -1,12 +1,12 @@
 .navbar {
   height: 56px;
-  background: #202123;
-  color: #ececf1;
+  background: #1f2430;
+  color: #e6eaf2;
+  border-bottom: 1px solid #3a4358;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 14px;
-  border-bottom: 1px solid #2f303a;
 }
 
 .nav-left {
@@ -17,7 +17,7 @@
 
 .menu-btn {
   background: transparent;
-  color: #ececf1;
+  color: #e6eaf2;
   font-size: 20px;
   border: none;
   cursor: pointer;
@@ -31,8 +31,9 @@
 }
 
 .role-badge {
-  background: #2a2b32;
-  border: 1px solid #3a3b46;
+  background: #2a3142;
+  border: 1px solid #3a4358;
+  color: #cfd6e4;
   border-radius: 999px;
   padding: 6px 10px;
   font-size: 12px;
