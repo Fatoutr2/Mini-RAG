@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "../assets/css/Index.css";
 function ChatWindow({ visitor = false }) {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Salut 👋🏻! Comment puis-je t'aider 🙂 ?" }
+    { role: "assistant", content: "Salut 👋🏻! Comment puis-je vous aider 🙂 ?" }
   ]);
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
