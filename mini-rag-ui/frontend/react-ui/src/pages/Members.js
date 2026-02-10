@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import AdminSidebar from "../components/AdminSidebar";
-import { deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
+import { createUser, deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
+import { listThreads, createThread, renameThread, deleteThread } from "../services/chatService";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
@@ -9,6 +11,12 @@ export default function MembersPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const [threads, setThreads] = useState([]);
+  const [activeThreadId, setActiveThreadId] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
+  const [creatingThread, setCreatingThread] = useState(false);
+
 
   const load = async () => {
     try {
@@ -46,11 +54,70 @@ export default function MembersPage() {
     await load();
   };
 
+  const refreshThreads = async (search = "") => {
+    const data = await listThreads(search);
+    setThreads(data);
+    setActiveThreadId((prevId) => {
+      if (!prevId && data.length > 0) return data[0].id;
+      if (prevId && !data.some((t) => t.id === prevId)) return data.length ? data[0].id : null;
+      return prevId;
+    });
+  };
+
+  useEffect(() => {
+    refreshThreads("");
+  }, []);
+
+  const handleNewChat = async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    if (creatingThread) return;
+
+    setCreatingThread(true);
+    try {
+      const t = await createThread();
+      setThreads((prev) => [t, ...prev]);
+      setActiveThreadId(t.id);
+      navigate(`/admin?threadId=${t.id}`);
+    } finally {
+      setCreatingThread(false);
+    }
+  };
+
+  const handleSearch = async (value) => {
+    setSearchValue(value);
+    await refreshThreads(value);
+  };
+
+  const handleRename = async (threadId, title) => {
+    const updated = await renameThread(threadId, title);
+    setThreads((prev) => prev.map((t) => (t.id === threadId ? updated : t)));
+  };
+
+  const handleDeleteThread = async (threadId) => {
+    await deleteThread(threadId);
+    setThreads((prev) => prev.filter((t) => t.id !== threadId));
+    setActiveThreadId((prevId) => (prevId === threadId ? null : prevId));
+  };
+
+
   return (
     <div className="app-layout">
       <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} />
       <div className="content-row">
-        <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} threads={[]} activeThreadId={null} />
+        <AdminSidebar
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          threads={threads}
+          activeThreadId={activeThreadId}
+          onNewChat={handleNewChat}
+          creatingThread={creatingThread}
+          onSearch={handleSearch}
+          onSelectThread={(id) => navigate(`/admin?threadId=${id}`)}
+          onRenameThread={handleRename}
+          onDeleteThread={handleDeleteThread}
+        />
+
 
         <main className="admin-page-content">
           <div className="admin-page-header">
