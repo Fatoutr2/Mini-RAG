@@ -12,9 +12,6 @@ SOCIAL_PATTERNS = {
     ],
     "help": [
         r"en quoi", r"peux-tu", r"aide", r"que peux-tu faire"
-    ],
-    "ask": [
-        r"t'es qui", r"qui", r"quoi", r"qui es tu", r"quoi es tu", r"t'es quoi", r"tu es qui", r"tu es quoi"
     ]
 }
 
@@ -33,8 +30,7 @@ def social_response(intent: str):
         "bye": "À bientôt 👋",
         "help": (
             "Je peux vous aider à retrouver des informations "
-            "et services de l’entreprise."
-        ),
-        "ask": "je suis votre Assistant IA 😊 N'hésitez pas si vous avez d'autres questions.",
+            "et les services proposés par l’entreprise."
+        )
     }
     return responses.get(intent)

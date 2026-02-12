@@ -8,7 +8,7 @@ from .excel_loader import load_excel_as_chunks
 from .json_loader import load_json
 from .json_loader import load_json_as_chunks
 
-from .db_loader import load_db_jobs
+from .db_loader import load_db_jobs, load_db_projects
 
 
 def load_file(path: str):
@@ -87,6 +87,15 @@ def load_all_documents(data_dir: str):
             "source": f"db_job_{i+1}",
             "type": "db_job"
         })
+
+    db_projects = load_db_projects()
+    for i, t in enumerate(db_projects):
+        documents.append({
+            "text": t,
+            "source": f"db_project_{i+1}",
+            "type": "db_project"
+        })
+
 
     return documents
     

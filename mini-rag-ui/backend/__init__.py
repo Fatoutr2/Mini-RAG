@@ -11,7 +11,7 @@ from backend.rag.loaders.excel_loader import load_excel
 from backend.rag.loaders.excel_loader import load_excel_as_chunks
 from backend.rag.loaders.json_loader import load_json
 from backend.rag.loaders.json_loader import load_json_as_chunks
-from backend.rag.loaders.db_loader import load_db_jobs
+from backend.rag.loaders.db_loader import load_db_jobs, load_db_projects
 
 
 def load_file(path: str):
@@ -37,10 +37,39 @@ def load_file(path: str):
 def load_all_documents(data_dir="data/documents"):
     documents = []
 
+    # 1️⃣ Documents fichiers (txt, pdf, etc.)
     for file in os.listdir(data_dir):
         path = os.path.join(data_dir, file)
-        documents.extend(load_file(path))
+        if not os.path.isfile(path):
+            continue
 
-    documents.extend(load_db_jobs())
+        file_docs = load_file(path)
+        for i, text in enumerate(file_docs):
+            documents.append({
+                "text": text,
+                "source": file,
+                "type": "file",
+                "already_chunked": False
+            })
+
+    # 2️⃣ Jobs depuis la base de données
+    db_jobs = load_db_jobs()
+    for i, text in enumerate(db_jobs):
+        documents.append({
+            "text": text,
+            "source": f"db_job_{i+1}",
+            "type": "db_job",
+            "already_chunked": True
+        })
+
+    # 3️⃣ Projets depuis la base de données
+    db_projects = load_db_projects()
+    for i, text in enumerate(db_projects):
+        documents.append({
+            "text": text,
+            "source": f"db_project_{i+1}",
+            "type": "db_project",
+            "already_chunked": True
+        })
 
     return documents

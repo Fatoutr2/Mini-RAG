@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from openai import OpenAI
 
-from .rag.loaders import load_all_documents, load_db_jobs
+from .rag.loaders import load_all_documents, load_db_jobs, load_db_projects
 from .rag.chunking import smart_chunk
 from .rag.embeddings import embed
 from .rag.vectorstore import build_index
@@ -71,6 +71,8 @@ class RAGEngine:
     # =========================
     def load_private_data(self, data_dir):
         documents = load_all_documents(data_dir)
+
+        # Jobs
         db_texts = load_db_jobs()
         for i, t in enumerate(db_texts):
             documents.append({
@@ -80,6 +82,15 @@ class RAGEngine:
                 "already_chunked": True
             })
 
+        # 🔹 Projets
+        db_projects = load_db_projects()
+        for i, t in enumerate(db_projects):
+            documents.append({
+                "text": t,
+                "source": f"db_project_{i+1}",
+                "type": "db_project",
+                "already_chunked": True
+            })
         self.private_chunks = self._process_documents(documents)
 
         if not self.private_chunks:
