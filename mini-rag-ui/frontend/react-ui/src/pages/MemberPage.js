@@ -12,6 +12,7 @@ export default function MemberPage() {
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [search, setSearch] = useState("");
   const [creatingThread, setCreatingThread] = useState(false);
+  const [chatMode, setChatMode] = useState("rag");
 
   const refreshThreads = async (q = "") => {
     const data = await listThreads(q);
@@ -60,7 +61,7 @@ export default function MemberPage() {
 
   return (
     <div className="app-layout">
-      <Navbar role="member" toggle={() => setSidebarOpen(!sidebarOpen)} />
+      <Navbar role="member" toggle={() => setSidebarOpen(!sidebarOpen)} chatMode={chatMode} onChatModeChange={setChatMode} />
       <div className="content-row">
         <MemberSidebar
           open={sidebarOpen}
@@ -79,6 +80,7 @@ export default function MemberPage() {
           sidebarOpen={sidebarOpen}
           activeThreadId={activeThreadId}
           onThreadAutoTitleRefresh={() => refreshThreads(search)}
+          mode={chatMode}
         />
       </div>
     </div>

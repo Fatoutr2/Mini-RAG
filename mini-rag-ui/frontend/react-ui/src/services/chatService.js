@@ -58,14 +58,26 @@ export async function getMessages(threadId) {
   return res.json();
 }
 
-export async function sendMessage(threadId, question) {
-  const res = await fetch(`${API_BASE}/conversations/${threadId}/messages`, {
+async function postMessage(url, question) {
+  const res = await fetch(url, {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({ question }),
   });
   if (!res.ok) throw new Error(await parseError(res, "Erreur serveur"));
   return res.json();
+}
+
+export async function sendMessage(threadId, question) {
+  return postMessage(`${API_BASE}/conversations/${threadId}/messages`, question);
+}
+
+export async function sendMessageRag(threadId, question) {
+  return postMessage(`${API_BASE}/conversations/${threadId}/messages/rag`, question);
+}
+
+export async function sendMessageChat(threadId, question) {
+  return postMessage(`${API_BASE}/conversations/${threadId}/messages/chat`, question);
 }
 
 export async function deleteThread(threadId) {

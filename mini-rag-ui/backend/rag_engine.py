@@ -205,3 +205,30 @@ class RAGEngine:
         prompt = build_prompt(reranked, question)
         response = client.responses.create(model="openai/gpt-4o-mini", input=prompt, temperature=0.1)
         return response.output_text.strip() or "Je n'ai pas cette information 😔"
+    
+    
+    # =========================
+    # ASK CHAT (LLM PUR)
+    # =========================
+    def ask_chat(self, question: str):
+        intent = detect_social_intent(question)
+        if intent:
+            return social_response(intent)
+
+        system_prompt = (
+            "Tu es SmartIA Assistant, un assistant conversationnel général en français. "
+            "Réponds de façon claire, utile et concise. "
+            "Si l'utilisateur demande du code, donne une réponse structurée et pratique."
+        )
+
+        response = client.responses.create(
+            model="openai/gpt-4o-mini",
+            input=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": question},
+            ],
+            temperature=0.4,
+        )
+
+        return response.output_text.strip() or "Je n'ai pas pu générer de réponse pour le moment."
+

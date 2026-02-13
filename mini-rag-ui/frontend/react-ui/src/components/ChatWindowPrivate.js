@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import "../assets/css/chat.css";
-import { getMessages, sendMessage } from "../services/chatService";
+import { getMessages, sendMessageChat, sendMessageRag } from "../services/chatService";
 
-function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefresh }) {
+function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefresh, mode = "rag" }) {  
   const [messages, setMessages] = useState([
     { role: "assistant", content: "Bonjour 👋 En quoi puis-je vous aider aujourd’hui ?" }
   ]);
@@ -47,7 +47,10 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
     setError("");
 
     try {
-      const data = await sendMessage(activeThreadId, text);
+      const data = mode === "chat"
+        ? await sendMessageChat(activeThreadId, text)
+        : await sendMessageRag(activeThreadId, text);
+
       setMessages((prev) => [...prev, { role: "assistant", content: data.answer || "" }]);
 
       if (onThreadAutoTitleRefresh) {
@@ -69,6 +72,11 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
 
   return (
     <div className={`chat-wrapper ${sidebarOpen ? "sidebar-open" : ""}`}>
+      
+      <div className="chat-mode-banner">
+        Mode actuel : <strong>{mode === "chat" ? "💬 Chat" : "📚 RAG"}</strong>
+      </div>
+
       <div className="chat-messages">
         {messages.map((msg, i) => (
           <div key={i} className={`message-row ${msg.role === "user" ? "right" : "left"}`}>

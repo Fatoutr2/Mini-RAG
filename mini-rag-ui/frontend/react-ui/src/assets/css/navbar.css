@@ -3,16 +3,44 @@
   background: #1f2430;
   color: #e6eaf2;
   border-bottom: 1px solid #3a4358;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   padding: 0 14px;
+  gap: 10px;
 }
 
 .nav-left {
   display: flex;
   align-items: center;
   gap: 10px;
+  justify-self: start;
+}
+
+.nav-center {
+  display: inline-flex;
+  align-items: center;
+  background: #151925;
+  border: 1px solid #3a4358;
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.mode-chip {
+  border: none;
+  background: transparent;
+  color: #cfd6e4;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.mode-chip.active {
+  background: #22c55e;
+  color: #0b1f14;
+  font-weight: 700;
 }
 
 .menu-btn {
@@ -30,6 +58,10 @@
   cursor: pointer;
 }
 
+.nav-right {
+  justify-self: end;
+}
+
 .role-badge {
   background: #2a3142;
   border: 1px solid #3a4358;
@@ -40,7 +72,20 @@
 }
 
 @media (max-width: 900px) {
+  .navbar {
+  grid-template-columns: auto 1fr auto;
+  }
+
   .menu-btn {
     display: block;
+  }
+  
+  .nav-center {
+    justify-self: center;
+  }
+
+  .mode-chip {
+    padding: 5px 9px;
+    font-size: 11px;
   }
 }

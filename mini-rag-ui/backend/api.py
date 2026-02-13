@@ -151,6 +151,37 @@ def send_message(thread_id: int, payload: AskPayload, user=Depends(get_current_u
     )
     return {"answer": answer}
 
+
+@app.post("/conversations/{thread_id}/messages/rag")
+def send_message_rag(thread_id: int, payload: AskPayload, user=Depends(get_current_user)):
+    if user["role"] == "visitor":
+        raise HTTPException(403, "Connexion requise")
+
+    answer = rag.ask(payload.question)
+    append_message_and_answer(
+        user_id=user["user_id"],
+        thread_id=thread_id,
+        question=payload.question,
+        answer=answer,
+    )
+    return {"answer": answer}
+
+
+@app.post("/conversations/{thread_id}/messages/chat")
+def send_message_chat(thread_id: int, payload: AskPayload, user=Depends(get_current_user)):
+    if user["role"] == "visitor":
+        raise HTTPException(403, "Connexion requise")
+
+    answer = rag.ask_chat(payload.question)
+    append_message_and_answer(
+        user_id=user["user_id"],
+        thread_id=thread_id,
+        question=payload.question,
+        answer=answer,
+    )
+    return {"answer": answer}
+
+
 # -------- MIDDLEWARE --------
 app.add_middleware(
     CORSMiddleware,

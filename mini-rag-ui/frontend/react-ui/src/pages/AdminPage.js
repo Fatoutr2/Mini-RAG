@@ -19,6 +19,7 @@ export default function AdminPage() {
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [searchValue, setSearchValue] = useState("");
   const [creatingThread, setCreatingThread] = useState(false);
+  const [chatMode, setChatMode] = useState("rag");
 
   const refreshThreads = async (search = "") => {
     const data = await listThreads(search);
@@ -69,7 +70,7 @@ export default function AdminPage() {
 
   return (
     <div className="app-layout">
-      <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} />
+      <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} chatMode={chatMode} onChatModeChange={setChatMode} />
 
       <div className="content-row">
         <AdminSidebar
@@ -93,6 +94,7 @@ export default function AdminPage() {
           sidebarOpen={sidebarOpen}
           activeThreadId={activeThreadId}
           onThreadAutoTitleRefresh={() => refreshThreads(searchValue)}
+          mode={chatMode}
         />
       </div>
     </div>
