@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import AdminSidebar from "../components/AdminSidebar";
 import { createUser, deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
 import { listThreads, createThread, renameThread, deleteThread } from "../services/chatService";
+import { uploadDocument } from "../services/uploadService";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
@@ -116,6 +117,7 @@ export default function Admins() {
           onSelectThread={(id) => navigate(`/admin?threadId=${id}`)}
           onRenameThread={handleRename}
           onDeleteThread={handleDeleteThread}
+          onUploadFile={uploadDocument}
         />
 
 

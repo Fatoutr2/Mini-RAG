@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import MemberSidebar from "../components/MemberSidebar";
 import ChatWindowPrivate from "../components/ChatWindowPrivate";
 import { listThreads, createThread, renameThread, deleteThread } from "../services/chatService";
+import { uploadDocument } from "../services/uploadService";
 import "../assets/css/layout.css";
 
 export default function MemberPage() {
@@ -72,6 +73,7 @@ export default function MemberPage() {
           onSelectThread={setActiveThreadId}
           onRenameThread={handleRename}
           onDeleteThread={handleDelete}
+          onUploadFile={(file) => uploadDocument(file, "private")}
         />
         <ChatWindowPrivate
           sidebarOpen={sidebarOpen}

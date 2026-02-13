@@ -18,10 +18,13 @@ export default function AdminSidebar({
   onOpenAccess,
   onOpenMembers,
   onOpenAdmins,
+  onUploadFile,
 }) {
   const { logout } = useAuth();
   const [menuOpenFor, setMenuOpenFor] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const menuRef = useRef(null);
+  const fileInputRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -35,6 +38,31 @@ export default function AdminSidebar({
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !onUploadFile) return;
+
+    const visibility =
+      window.prompt("Destination ? Tapez public ou private", "private")?.trim().toLowerCase() || "private";
+
+    if (!["public", "private"].includes(visibility)) {
+      window.alert("Destination invalide. Utilisez public ou private.");
+      e.target.value = "";
+      return;
+    }
+
+    setUploading(true);
+    try {
+      await onUploadFile(file, visibility);
+      window.alert(`Fichier déposé dans data/${visibility}`);
+    } catch (err) {
+      window.alert(err.message || "Upload impossible");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
 
   return (
     <aside className={`sidebar ${open ? "open" : ""}`}>
@@ -133,6 +161,22 @@ export default function AdminSidebar({
 
 
       <div className="sidebar-bottom">
+        <input
+          ref={fileInputRef}
+          type="file"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+        <button
+          className="sidebar-btn"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+        >
+          {uploading ? "Upload..." : "📁 Ajouter fichier"}
+        </button>
+
+        <div className="sidebar-divider" />
+
         <button className="logout" onClick={logout}>Déconnexion</button>
       </div>
     </aside>

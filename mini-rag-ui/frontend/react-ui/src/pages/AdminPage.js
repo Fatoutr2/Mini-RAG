@@ -8,6 +8,7 @@ import {
   renameThread,
   deleteThread,
 } from "../services/chatService";
+import { uploadDocument } from "../services/uploadService";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
@@ -85,6 +86,7 @@ export default function AdminPage() {
           onOpenAccess={() => console.log("Accès")}
           onOpenMembers={() => console.log("Membres")}
           onOpenAdmins={() => console.log("Admins")}
+          onUploadFile={uploadDocument}
         />
 
         <ChatWindowPrivate

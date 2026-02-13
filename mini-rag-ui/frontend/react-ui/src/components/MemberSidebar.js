@@ -14,10 +14,29 @@ export default function MemberSidebar({
   onSelectThread,
   onRenameThread,
   onDeleteThread,
+  onUploadFile,
 }) {
   const { logout } = useAuth();
   const [menuOpenFor, setMenuOpenFor] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const menuRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !onUploadFile) return;
+
+    setUploading(true);
+    try {
+      await onUploadFile(file);
+      window.alert("Fichier déposé dans data/private");
+    } catch (err) {
+      window.alert(err.message || "Upload impossible");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
 
   useEffect(() => {
     const onDocClick = (e) => {
@@ -95,6 +114,22 @@ export default function MemberSidebar({
       </div>
 
       <div className="sidebar-bottom">
+        <input
+          ref={fileInputRef}
+          type="file"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+        <button
+          className="sidebar-btn"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+        >
+          {uploading ? "Upload..." : "📁 Ajouter fichier"}
+        </button>
+
+        <div className="sidebar-divider" />
+        
         <button className="logout" onClick={logout}>Déconnexion</button>
       </div>
     </aside>

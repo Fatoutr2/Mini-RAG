@@ -1,7 +1,8 @@
-from fastapi import Depends, FastAPI, HTTPException, APIRouter, Query as FastQuery
+from fastapi import Depends, FastAPI, HTTPException, APIRouter, Query as FastQuery, UploadFile, File, Form
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-
+from pathlib import Path
+import os
 from .rag_engine import RAGEngine
 from .auth.security import get_current_user
 from .utils import save_conversation, get_history
@@ -19,6 +20,7 @@ from .auth.routes import router as auth_router
 
 app = FastAPI()
 rag = RAGEngine()
+BASE_DIR = Path(__file__).resolve().parents[1]
 
 class Query(BaseModel):
     question: str
@@ -58,6 +60,42 @@ def add_doc(user=Depends(get_current_user)):
     if user["role"] != "admin":
         raise HTTPException(403, "Accès admin requis")
     return {"message": "Admin autorisé"}
+
+
+@app.post("/documents/upload")
+async def upload_document(
+    file: UploadFile = File(...),
+    visibility: str = Form("private"),
+    user=Depends(get_current_user),
+):
+    if user["role"] not in ["member", "admin"]:
+        raise HTTPException(403, "Connexion requise")
+
+    normalized_visibility = (visibility or "private").strip().lower()
+    if normalized_visibility not in ["public", "private"]:
+        raise HTTPException(400, "visibility doit être 'public' ou 'private'")
+
+    if normalized_visibility == "public" and user["role"] != "admin":
+        raise HTTPException(403, "Seul un admin peut déposer un fichier public")
+
+    filename = os.path.basename(file.filename or "")
+    if not filename:
+        raise HTTPException(400, "Nom de fichier invalide")
+
+    target_dir = BASE_DIR / "data" / normalized_visibility
+    target_dir.mkdir(parents=True, exist_ok=True)
+    destination = target_dir / filename
+
+    content = await file.read()
+    destination.write_bytes(content)
+
+    return {
+        "message": "Fichier déposé",
+        "path": str(destination.relative_to(BASE_DIR)),
+        "visibility": normalized_visibility,
+        "filename": filename,
+    }
+
 
 
 # -------- VISTOR --------
