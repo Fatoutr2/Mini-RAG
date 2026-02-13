@@ -19,6 +19,7 @@ export default function MemberSidebar({
   const { logout } = useAuth();
   const [menuOpenFor, setMenuOpenFor] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [chatsCollapsed, setChatsCollapsed] = useState(false);
   const menuRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -67,51 +68,61 @@ export default function MemberSidebar({
 
       <div className="sidebar-divider" />
 
-      <div className="sidebar-section-title">Vos chats</div>
-      <div className="sidebar-list">
-        {threads.map((t) => (
-          <div key={t.id} className={`thread-row ${activeThreadId === t.id ? "active" : ""}`}>
-            <button className="thread-title-btn" onClick={() => onSelectThread(t.id)}>
-              {t.title}
-            </button>
+      <button
+        className="sidebar-section-toggle"
+        onClick={() => setChatsCollapsed((v) => !v)}
+        aria-expanded={!chatsCollapsed}
+      >
+        <span>Vos chats</span>
+        <span className={`chevron ${chatsCollapsed ? "collapsed" : ""}`}>▾</span>
+      </button>
 
-            <div className="thread-menu-wrap" ref={menuOpenFor === t.id ? menuRef : null}>
-              <button
-                className="thread-more-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setMenuOpenFor((prev) => (prev === t.id ? null : t.id));
-                }}
-              >
-                ⋯
+      {!chatsCollapsed && (
+        <div className="sidebar-list">
+          {threads.map((t) => (
+            <div key={t.id} className={`thread-row ${activeThreadId === t.id ? "active" : ""}`}>
+              <button className="thread-title-btn" onClick={() => onSelectThread(t.id)}>
+                {t.title}
               </button>
 
-              {menuOpenFor === t.id && (
-                <div className="thread-dropdown">
-                  <button
-                    onClick={() => {
-                      const next = prompt("Nouveau titre", t.title);
-                      if (next && next.trim()) onRenameThread(t.id, next.trim());
-                      setMenuOpenFor(null);
-                    }}
-                  >
-                    Renommer
-                  </button>
-                  <button
-                    className="danger"
-                    onClick={() => {
-                      if (window.confirm("Supprimer ce chat ?")) onDeleteThread(t.id);
-                      setMenuOpenFor(null);
-                    }}
-                  >
-                    Supprimer
-                  </button>
-                </div>
-              )}
+              <div className="thread-menu-wrap" ref={menuOpenFor === t.id ? menuRef : null}>
+                <button
+                  className="thread-more-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpenFor((prev) => (prev === t.id ? null : t.id));
+                  }}
+                >
+                  ⋯
+                </button>
+
+                {menuOpenFor === t.id && (
+                  <div className="thread-dropdown">
+                    <button
+                      onClick={() => {
+                        const next = prompt("Nouveau titre", t.title);
+                        if (next && next.trim()) onRenameThread(t.id, next.trim());
+                        setMenuOpenFor(null);
+                      }}
+                    >
+                      Renommer
+                    </button>
+                    <button
+                      className="danger"
+                      onClick={() => {
+                        if (window.confirm("Supprimer ce chat ?")) onDeleteThread(t.id);
+                        setMenuOpenFor(null);
+                      }}
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <div className="sidebar-bottom">
         <input
@@ -129,7 +140,7 @@ export default function MemberSidebar({
         </button>
 
         <div className="sidebar-divider" />
-        
+
         <button className="logout" onClick={logout}>Déconnexion</button>
       </div>
     </aside>

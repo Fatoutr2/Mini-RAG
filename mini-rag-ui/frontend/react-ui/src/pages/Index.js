@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useLocation } from "react";
 import "../assets/css/Index.css";
 import VisitorRAG from "./VisitorRAG";
 import LoginModal from "../components/LoginModal";
@@ -11,6 +11,14 @@ export default function Index() {
   const [showRegister, setShowRegister] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("login") === "1") {
+      setShowLogin(true);
+    }
+  }, [location.search]);
 
 
   return (
