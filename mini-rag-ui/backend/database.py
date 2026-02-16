@@ -17,6 +17,8 @@ def get_db():
         password=os.getenv("DB_PASSWORD", "postgres123"),
         options="-c client_encoding=UTF8",
     )
+    with conn.cursor() as cur:
+        cur.execute("SET search_path TO public")
     try:
         yield conn
     finally:

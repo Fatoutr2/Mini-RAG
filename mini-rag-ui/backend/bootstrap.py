@@ -7,7 +7,17 @@ def ensure_schema():
 
         # Thread mode persistence
         cur.execute("ALTER TABLE IF EXISTS chat_threads ADD COLUMN IF NOT EXISTS mode VARCHAR(16) DEFAULT 'rag'")
-        cur.execute("UPDATE chat_threads SET mode='rag' WHERE mode IS NULL")
+        cur.execute(
+            """
+            DO $$
+            BEGIN
+            IF to_regclass('public.chat_threads') IS NOT NULL THEN
+                UPDATE chat_threads SET mode='rag' WHERE mode IS NULL;
+            END IF;
+            END $$;
+            """
+        )
+
 
         # Refresh tokens
         cur.execute(
