@@ -9,7 +9,6 @@ from pydantic import BaseModel
 from .audit import log_admin_action
 from .auth.routes import router as auth_router
 from .auth.security import get_current_user
-from .bootstrap import ensure_schema
 from .metrics import inc_route, inc_route_error, route_timer, snapshot_metrics
 from .rag_engine import RAGEngine
 from .utils import (
@@ -47,9 +46,6 @@ class RenameFilePayload(BaseModel):
     new_name: str
 
 
-@app.on_event("startup")
-def on_startup():
-    ensure_schema()
 
 
 @app.middleware("http")
