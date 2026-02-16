@@ -3,6 +3,8 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bg-main);
+  color: var(--text-main);
 }
 
 /* ================= CONTENT ================= */
@@ -23,11 +25,11 @@
 
   .sidebar {
     position: fixed;
-    top: 50px; /* sous le navbar */
+    top: 64px;
     left: 0;
-    height: calc(100vh - 50px);
+    height: calc(100vh - 64px);
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.28s ease;
     z-index: 1001;
   }
 
