@@ -46,16 +46,16 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
     const text = (forcedText ?? question).trim();
     if (!text || loading || !activeThreadId) return;
 
-    if (!forcedText) {
-      setMessages((prev) => [...prev, { role: "user", content: text }]);
-      setQuestion("");
-    }
-
+    setMessages((prev) => [...prev, { role: "user", content: text }]);
+    setQuestion("");
     setLoading(true);
     setError("");
 
     try {
-      const data = await sendByMode(activeThreadId, text);
+      const data = mode === "chat"
+        ? await sendMessageChat(activeThreadId, text)
+        : await sendMessageRag(activeThreadId, text);
+
       setMessages((prev) => [...prev, { role: "assistant", content: data.answer || "" }]);
 
       if (onThreadAutoTitleRefresh) {
@@ -68,30 +68,12 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
     }
   };
 
-  const handleRegenerate = async (assistantIndex) => {
-    const lastUser = [...messages.slice(0, assistantIndex)].reverse().find((m) => m.role === "user");
-    if (!lastUser) return;
-
-    setMessages((prev) => prev.filter((_, idx) => idx !== assistantIndex));
-    await handleSend(lastUser.content);
-  };
-
-  const handleCopy = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text || "");
-    } catch (_) {
-      setError("Impossible de copier");
-    }
-  };
-
   const onKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   };
-  
-  const sourceLabel = mode === "chat" ? "LLM pur" : "Réponse basée sur documents internes";
 
   return (
     <div className={`chat-wrapper ${sidebarOpen ? "sidebar-open" : ""}`}>
@@ -103,15 +85,7 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
       <div className="chat-messages">
         {messages.map((msg, i) => (
           <div key={i} className={`message-row ${msg.role === "user" ? "right" : "left"}`}>
-            <div className={`chat-bubble ${msg.role}`}>
-              {msg.content}
-              {msg.role === "assistant" && (
-                <div className="assistant-actions">
-                  <button type="button" onClick={() => handleCopy(msg.content)}>Copier</button>
-                  <button type="button" onClick={() => handleRegenerate(i)}>Régénérer</button>
-                </div>
-              )}
-            </div>
+            <div className={`chat-bubble ${msg.role}`}>{msg.content}</div>
           </div>
         ))}
 
@@ -133,7 +107,7 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
           onKeyDown={onKeyDown}
           disabled={!activeThreadId}
         />
-        <button onClick={() => handleSend()} disabled={loading || !activeThreadId}>➤</button>
+        <button onClick={handleSend} disabled={loading || !activeThreadId}>➤</button>
       </div>
 
       {error && <p className="chat-error">{error}</p>}

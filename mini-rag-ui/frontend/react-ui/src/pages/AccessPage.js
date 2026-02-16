@@ -24,7 +24,7 @@ export default function AccessPage() {
   const [files, setFiles] = useState([]);
 
 
-
+  
   const loadFiles = async (v = visibility) => {
     try {
       const data = await listUploadedFiles(v);
@@ -47,7 +47,6 @@ export default function AccessPage() {
 
   useEffect(() => {
     loadUsers();
-    loadFiles("private");
   }, []);
 
   const onCreate = async (e) => {
@@ -77,26 +76,6 @@ export default function AccessPage() {
     await updateUserRole(u.id, role.trim());
     await loadUsers();
   };
-
-
-  const onDeleteFile = async (name) => {
-    if (!window.confirm(`Supprimer ${name} ?`)) return;
-    await deleteUploadedFile(visibility, name);
-    await loadFiles(visibility);
-  };
-
-  const onRenameFile = async (name) => {
-    const next = prompt("Nouveau nom", name);
-    if (!next || !next.trim()) return;
-    await renameUploadedFile(visibility, name, next.trim());
-    await loadFiles(visibility);
-  };
-
-  const onReindex = async () => {
-    await reindexNow();
-    window.alert("Re-index terminé");
-  };
-
 
   const onDelete = async (u) => {
     if (!window.confirm(`Supprimer ${u.email} ?`)) return;
@@ -217,43 +196,6 @@ export default function AccessPage() {
           </section>
 
           {error && <p className="admin-error">{error}</p>}
-
-
-          <section className="admin-card">
-            <h2 className="admin-card-title">Fichiers RAG</h2>
-            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-              <button className="admin-btn" onClick={() => { setVisibility("private"); loadFiles("private"); }}>Private</button>
-              <button className="admin-btn" onClick={() => { setVisibility("public"); loadFiles("public"); }}>Public</button>
-              <button className="admin-btn primary" onClick={onReindex}>Re-indexer maintenant</button>
-            </div>
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Nom</th>
-                    <th>Taille (bytes)</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {files.map((f) => (
-                    <tr key={f.name}>
-                      <td>{f.name}</td>
-                      <td>{f.size}</td>
-                      <td>
-                        <div className="admin-actions">
-                          <button className="admin-btn" onClick={() => onRenameFile(f.name)}>Renommer</button>
-                          <button className="admin-btn danger" onClick={() => onDeleteFile(f.name)}>Supprimer</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-
 
           <section className="admin-card">
             <h2 className="admin-card-title">Tous les utilisateurs</h2>
