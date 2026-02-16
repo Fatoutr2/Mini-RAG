@@ -1,9 +1,9 @@
 .admin-page-content {
   flex: 1;
-  padding: 24px;
+  padding: 28px;
   overflow: auto;
-  background: #2f3136;
-  color: #f3f4f6;
+  background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.06), transparent 30%), var(--bg-main);
+  color: var(--text-main);
 }
 
 .admin-page-header {
@@ -11,105 +11,108 @@
 }
 
 .admin-page-title {
-  margin: 0 0 6px;
-  font-size: 24px;
-  font-weight: 700;
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
 }
 
 .admin-page-subtitle {
   margin: 0;
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
 .admin-error {
   margin: 10px 0 16px;
-  color: #fecaca;
-  background: rgba(127, 29, 29, 0.2);
-  border: 1px solid #7f1d1d;
+  color: #fb7185;
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.35);
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .admin-card {
-  background: #24262b;
-  border: 1px solid #3b3f47;
-  border-radius: 14px;
-  padding: 16px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
   margin-bottom: 16px;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
 }
 
 .admin-card-title {
   margin: 0 0 12px;
   font-size: 16px;
   font-weight: 700;
-  color: #e5e7eb;
+  color: var(--text-main);
 }
 
 .admin-form {
   display: grid;
   gap: 10px;
-  max-width: 460px;
+  max-width: 480px;
 }
 
 .admin-input,
 .admin-select {
   width: 100%;
-  border: 1px solid #4b5563;
-  background: #1f2329;
-  color: #f9fafb;
-  border-radius: 10px;
-  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text-main);
+  border-radius: 12px;
+  padding: 11px 12px;
   outline: none;
 }
 
 .admin-input:focus,
 .admin-select:focus {
-  border-color: #19c37d;
-  box-shadow: 0 0 0 2px rgba(25, 195, 125, 0.2);
+  border-color: rgba(16, 185, 129, 0.65);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
 }
 
 .admin-checkbox {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #e5e7eb;
+  color: var(--text-main);
   font-size: 14px;
 }
 
 .admin-btn {
-  border: 1px solid #4b5563;
-  background: #2d3748;
-  color: #fff;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text-main);
   border-radius: 10px;
   padding: 8px 12px;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 600;
 }
 
 .admin-btn:hover {
-  background: #374151;
+  filter: brightness(0.97);
 }
 
 .admin-btn.primary {
-  background: #19c37d;
-  border-color: #19c37d;
-  color: #0b1f14;
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
   font-weight: 700;
 }
 
 .admin-btn.primary:hover {
-  background: #16a56a;
+  filter: brightness(0.95);
 }
 
 .admin-btn.danger {
-  border-color: #7f1d1d;
-  color: #fecaca;
+  border-color: rgba(244, 63, 94, 0.4);
+  color: #fb7185;
   background: transparent;
 }
 
 .admin-btn.danger:hover {
-  background: rgba(127, 29, 29, 0.25);
+  background: rgba(244, 63, 94, 0.08);
 }
 
 .admin-btn:disabled {
@@ -119,31 +122,36 @@
 
 .admin-table-wrap {
   overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
 }
 
 .admin-table {
   width: 100%;
   min-width: 760px;
   border-collapse: collapse;
+  background: var(--bg-panel);
 }
 
 .admin-table th,
 .admin-table td {
   text-align: left;
   padding: 12px 10px;
-  border-bottom: 1px solid #3b3f47;
+  border-bottom: 1px solid var(--border);
   vertical-align: middle;
 }
 
 .admin-table thead th {
-  color: #cbd5e1;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  background: var(--bg-soft);
 }
 
 .admin-table tbody tr:hover {
-  background: rgba(55, 65, 81, 0.25);
+  background: rgba(148, 163, 184, 0.08);
 }
 
 .role-badge {
@@ -155,21 +163,21 @@
 }
 
 .role-badge.member {
-  background: rgba(30, 64, 175, 0.18);
-  border-color: #1e40af;
-  color: #bfdbfe;
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
 }
 
 .role-badge.admin {
-  background: rgba(6, 78, 59, 0.25);
-  border-color: #047857;
-  color: #bbf7d0;
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(16, 185, 129, 0.45);
+  color: #34d399;
 }
 
 .role-badge.visitor {
-  background: rgba(120, 53, 15, 0.2);
-  border-color: #92400e;
-  color: #fed7aa;
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #f59e0b;
 }
 
 .admin-actions {
@@ -184,6 +192,10 @@
   }
 
   .admin-page-title {
-    font-size: 20px;
+    font-size: 22px;
+  }
+
+  .admin-card {
+    padding: 14px;
   }
 }

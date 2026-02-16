@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import AdminSidebar from "../components/AdminSidebar";
 import { createUser, deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
 import { listThreads, createThread, renameThread, deleteThread } from "../services/chatService";
 import { uploadDocument } from "../services/uploadService";
-import { deleteUploadedFile, listUploadedFiles, renameUploadedFile, reindexNow } from "../services/adminFileService";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
@@ -20,21 +19,6 @@ export default function AccessPage() {
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [searchValue, setSearchValue] = useState("");
   const [creatingThread, setCreatingThread] = useState(false);
-  const [visibility, setVisibility] = useState("private");
-  const [files, setFiles] = useState([]);
-
-
-  
-  const loadFiles = async (v = visibility) => {
-    try {
-      const data = await listUploadedFiles(v);
-      setFiles(data.files || []);
-    } catch (e) {
-      setError(e.message);
-    }
-  };
-
-
   const loadUsers = async () => {
     try {
       setError("");

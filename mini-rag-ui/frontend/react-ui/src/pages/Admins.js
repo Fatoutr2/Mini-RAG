@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import AdminSidebar from "../components/AdminSidebar";
-import { createUser, deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
+import { deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
 import { listThreads, createThread, renameThread, deleteThread } from "../services/chatService";
 import { uploadDocument } from "../services/uploadService";
 import "../assets/css/layout.css";
