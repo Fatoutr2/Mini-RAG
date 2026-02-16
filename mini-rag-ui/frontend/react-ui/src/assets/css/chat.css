@@ -107,3 +107,32 @@
   text-align: center;
   padding: 8px 0 12px;
 }
+
+.chat-source-badge {
+  margin-left: 10px;
+  border: 1px solid #3a4358;
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 2px 8px;
+  color: #9aa4b5;
+}
+
+.assistant-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.assistant-actions button {
+  border: 1px solid #3a4358;
+  background: transparent;
+  color: #d3d9e6;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.assistant-actions button:hover {
+  background: #1f2430;
+}

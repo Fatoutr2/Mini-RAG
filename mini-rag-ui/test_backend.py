@@ -1,10 +1,15 @@
-import requests
+import os
+import tempfile
 import time
+
+import requests
 
 BASE_URL = "http://127.0.0.1:8000"
 
+ADMIN_EMAIL = os.getenv("TEST_ADMIN_EMAIL", "testad@gmail.com")
+ADMIN_PASSWORD = os.getenv("TEST_ADMIN_PASSWORD", "12345678")
 
-# ---------------- UTILS ----------------
+
 def wait_for_server(timeout=10):
     print("⏳ Vérification du serveur FastAPI...")
     start = time.time()
@@ -21,73 +26,71 @@ def wait_for_server(timeout=10):
 
 
 def register_user(email, password):
-    r = requests.post(
-        f"{BASE_URL}/auth/register",
-        json={"email": email, "password": password}
-    )
-    print("Register:", r.status_code, r.json())
+    requests.post(f"{BASE_URL}/auth/register", json={"email": email, "password": password})
 
 
 def login_user(email, password):
-    r = requests.post(
-        f"{BASE_URL}/auth/login",
-        json={"email": email, "password": password}
-    )
-    print("Login:", r.status_code, r.json())
+    r = requests.post(f"{BASE_URL}/auth/login", json={"email": email, "password": password})
+    print("Login:", r.status_code)
     if r.status_code == 200:
-        return r.json()["access_token"]
-    return None
+        data = r.json()
+        return data.get("access_token"), data.get("refresh_token")
+    return None, None
 
 
-def query_rag(token, question):
-    headers = {"Authorization": f"Bearer {token}"}
+def create_thread(token, mode="rag"):
     r = requests.post(
-        f"{BASE_URL}/query",
-        json={"question": question},
-        headers=headers
+        f"{BASE_URL}/conversations?mode={mode}",
+        headers={"Authorization": f"Bearer {token}"},
     )
-    print("RAG:", r.status_code, r.json())
+    if r.status_code != 200:
+        print("Create thread failed:", r.status_code, r.text)
+        return None
+    return r.json()["id"]
 
 
-def admin_users(token):
-    headers = {"Authorization": f"Bearer {token}"}
-    r = requests.get(f"{BASE_URL}/auth/admin/users", headers=headers)
-    print("Admin Users:", r.status_code, r.json())
+def ask_mode(token, thread_id, mode, question):
+    r = requests.post(
+        f"{BASE_URL}/conversations/{thread_id}/messages/{mode}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"question": question},
+    )
+    print(f"{mode}:", r.status_code, r.json())
 
 
-def admin_conversations(token):
-    headers = {"Authorization": f"Bearer {token}"}
-    r = requests.get(f"{BASE_URL}/auth/admin/conversations", headers=headers)
-    print("Admin Conversations:", r.status_code, r.json())
+def upload_public_as_member(token):
+    with tempfile.NamedTemporaryFile("w", delete=False, suffix=".txt") as f:
+        f.write("sample")
+        path = f.name
+    with open(path, "rb") as fp:
+        r = requests.post(
+            f"{BASE_URL}/documents/upload",
+            headers={"Authorization": f"Bearer {token}"},
+            data={"visibility": "public"},
+            files={"file": ("sample.txt", fp, "text/plain")},
+        )
+    print("Upload public as member:", r.status_code, r.text)
 
 
-# ---------------- MAIN ----------------
 if __name__ == "__main__":
-
     if not wait_for_server():
         exit(1)
 
-    print("\n===== 👤 VISITOR =====")
-    r = requests.get(f"{BASE_URL}/public/company-info")
-    print("Public info:", r.status_code, r.json())
-
-    r = requests.post(f"{BASE_URL}/query", json={"question": "Test sans token"})
-    print("Query sans token:", r.status_code, r.json())
-
-    print("\n===== 👤 MEMBER =====")
-    email_member = "test@gmail.com"
+    email_member = f"test_{int(time.time())}@gmail.com"
     password = "12345678"
 
     register_user(email_member, password)
-    member_token = login_user(email_member, password)
+    member_token, member_refresh = login_user(email_member, password)
+
+    admin_token, admin_refresh = login_user(ADMIN_EMAIL, ADMIN_PASSWORD)
 
     if member_token:
-        query_rag(member_token, "Quelle est l'entreprise Mini RAG ?")
+        thread_id = create_thread(member_token, mode="chat")
+        if thread_id:
+            ask_mode(member_token, thread_id, "chat", "Donne-moi un résumé de SmartIA")
+            ask_mode(member_token, thread_id, "rag", "Quelles infos internes as-tu ?")
+        upload_public_as_member(member_token)
 
-    print("\n===== 👑 ADMIN =====")
-    admin_token = login_user("testad@gmail.com", "12345678")
-
-    if admin_token:
-        query_rag(admin_token, "Question admin test")
-        admin_users(admin_token)
-        admin_conversations(admin_token)
+    if admin_token and admin_refresh:
+        r = requests.post(f"{BASE_URL}/auth/refresh", json={"refresh_token": admin_refresh})
+        print("Refresh:", r.status_code, r.text)

@@ -1,16 +1,21 @@
 # backend/database.py
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import os
 from contextlib import contextmanager
+
+import psycopg2
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 @contextmanager
 def get_db():
     conn = psycopg2.connect(
-        host="localhost",
-        database="rag-db",
-        user="postgres",
-        password="postgres123",
-        options="-c client_encoding=UTF8"
+        host=os.getenv("DB_HOST", "localhost"),
+        database=os.getenv("DB_NAME", "rag-db"),
+        user=os.getenv("DB_USER", "postgres"),
+        password=os.getenv("DB_PASSWORD", "postgres123"),
+        options="-c client_encoding=UTF8",
     )
     try:
         yield conn

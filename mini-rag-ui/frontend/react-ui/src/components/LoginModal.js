@@ -23,7 +23,7 @@ function LoginModal({ onClose }) {
       }
 
       const data = await res.json();
-      login(data.access_token, data.role);
+      login(data.access_token, data.role, data.refresh_token);
       onClose();
     } catch (err) {
       setError("Erreur réseau ou serveur");

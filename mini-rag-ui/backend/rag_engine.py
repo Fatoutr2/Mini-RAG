@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
-from openai import OpenAI
 
 from .rag.loaders import load_all_documents, load_db_jobs, load_db_projects
 from .rag.chunking import smart_chunk
@@ -11,23 +10,12 @@ from .rag.retriever import retrieve
 from .rag.reranker import rerank
 from .rag.prompt import build_prompt
 from .rag.social import detect_social_intent, social_response
+from .llm_client import create_response
 
 # =========================
 # ENV & CLIENT
 # =========================
 load_dotenv()
-api_key = os.getenv("OPENROUTER_API_KEY")
-if not api_key:
-    raise ValueError("❌ La clé OPENROUTER_API_KEY n'est pas définie.")
-
-client = OpenAI(
-    api_key=api_key,
-    base_url="https://openrouter.ai/api/v1",
-    default_headers={
-        "HTTP-Referer": "http://localhost:3000",
-        "X-Title": "Mini-RAG-Entreprise"
-    }
-)
 
 # =========================
 # RAG ENGINE SÛR
@@ -173,11 +161,7 @@ class RAGEngine:
             + f"\n\nQUESTION : {question}\nRÉPONSE :"
         )
 
-        response = client.responses.create(
-            model="openai/gpt-4o-mini",
-            input=prompt,
-            temperature=0.1
-        )
+        response = create_response(prompt, temperature=0.1)
         return response.output_text.strip() or "Je n'ai pas cette information 😔"
 
     # =========================
@@ -203,10 +187,11 @@ class RAGEngine:
         print("DEBUG chunk:", reranked[0])
 
         prompt = build_prompt(reranked, question)
-        response = client.responses.create(model="openai/gpt-4o-mini", input=prompt, temperature=0.1)
+        response = create_response(prompt, temperature=0.1)
         return response.output_text.strip() or "Je n'ai pas cette information 😔"
     
     
+
     # =========================
     # ASK CHAT (LLM PUR)
     # =========================
@@ -221,14 +206,9 @@ class RAGEngine:
             "Si l'utilisateur demande du code, donne une réponse structurée et pratique."
         )
 
-        response = client.responses.create(
-            model="openai/gpt-4o-mini",
-            input=[
+        response = create_response([
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": question},
-            ],
-            temperature=0.4,
-        )
+            ], temperature=0.4)
 
         return response.output_text.strip() or "Je n'ai pas pu générer de réponse pour le moment."
-

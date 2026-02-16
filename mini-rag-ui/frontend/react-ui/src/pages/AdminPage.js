@@ -7,6 +7,7 @@ import {
   createThread,
   renameThread,
   deleteThread,
+  setThreadMode,
 } from "../services/chatService";
 import { uploadDocument } from "../services/uploadService";
 import "../assets/css/layout.css";
@@ -36,6 +37,16 @@ export default function AdminPage() {
     refreshThreads("");
   }, []);
 
+  useEffect(() => {
+    const active = threads.find((t) => t.id === activeThreadId);
+    if (active?.mode) setChatMode(String(active.mode).toLowerCase());
+  }, [threads, activeThreadId]);
+
+  useEffect(() => {
+    if (!activeThreadId) return;
+    setThreadMode(activeThreadId, chatMode).catch(() => {});
+  }, [activeThreadId, chatMode]);
+
   const handleNewChat = async (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
@@ -43,7 +54,7 @@ export default function AdminPage() {
 
     setCreatingThread(true);
     try {
-      const t = await createThread();
+      const t = await createThread(chatMode);
       setThreads((prev) => [t, ...prev]);
       setActiveThreadId(t.id);
       setSidebarOpen(false);
@@ -81,7 +92,11 @@ export default function AdminPage() {
           onNewChat={handleNewChat}
           creatingThread={creatingThread}
           onSearch={handleSearch}
-          onSelectThread={setActiveThreadId}
+          onSelectThread={(id) => {
+            const th = threads.find((x) => x.id === id);
+            setChatMode((th?.mode || "rag").toLowerCase());
+            setActiveThreadId(id);
+          }}
           onRenameThread={handleRename}
           onDeleteThread={handleDelete}
           onOpenAccess={() => console.log("Accès")}

@@ -94,10 +94,18 @@ pip install -r requirements.txt
 ## Variables d’environnement (exemple)
 ```bash
 export OPENROUTER_API_KEY="..."
+export JWT_SECRET_KEY="change-me-in-prod"
+export JWT_REFRESH_SECRET_KEY="change-me-too"
+export JWT_ACCESS_EXPIRE_MINUTES="30"
+export JWT_REFRESH_EXPIRE_DAYS="7"
+export FRONTEND_ORIGINS="http://localhost:3000,http://127.0.0.1:3000"
 ```
 # optionnel selon votre setup
 ```bash
-export DATABASE_URL="postgresql://postgres:postgres123@localhost:5432/rag-db"
+export DB_HOST="localhost"
+export DB_NAME="rag-db"
+export DB_USER="postgres"
+export DB_PASSWORD="postgres123"
 ```
 
 
@@ -161,6 +169,8 @@ Frontend : http://localhost:3000
 
   - POST /auth/login
 
+  - POST /auth/refresh
+
 - Chat Threads
   - POST /conversations
 
@@ -169,6 +179,13 @@ Frontend : http://localhost:3000
   - GET /conversations/{thread_id}/messages
 
   - POST /conversations/{thread_id}/messages
+
+  - POST /conversations/{thread_id}/messages/rag
+
+  - POST /conversations/{thread_id}/messages/chat
+
+  - PATCH /conversations/{thread_id}/mode
+
 
   - PATCH /conversations/{thread_id}
 

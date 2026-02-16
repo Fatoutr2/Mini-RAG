@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import MemberSidebar from "../components/MemberSidebar";
 import ChatWindowPrivate from "../components/ChatWindowPrivate";
-import { listThreads, createThread, renameThread, deleteThread } from "../services/chatService";
+import { listThreads, createThread, renameThread, deleteThread, setThreadMode } from "../services/chatService";
 import { uploadDocument } from "../services/uploadService";
 import "../assets/css/layout.css";
 
@@ -28,6 +28,16 @@ export default function MemberPage() {
     refreshThreads("");
   }, []);
 
+  useEffect(() => {
+    const active = threads.find((t) => t.id === activeThreadId);
+    if (active?.mode) setChatMode(String(active.mode).toLowerCase());
+  }, [threads, activeThreadId]);
+
+  useEffect(() => {
+    if (!activeThreadId) return;
+    setThreadMode(activeThreadId, chatMode).catch(() => {});
+  }, [activeThreadId, chatMode]);
+
   const handleNewChat = async (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
@@ -35,8 +45,7 @@ export default function MemberPage() {
 
     setCreatingThread(true);
     try {
-      const t = await createThread();
-      setThreads((prev) => [t, ...prev]);
+      const t = await createThread(chatMode);      setThreads((prev) => [t, ...prev]);
       setActiveThreadId(t.id);
     } finally {
       setCreatingThread(false);
@@ -71,7 +80,11 @@ export default function MemberPage() {
           onNewChat={handleNewChat}
           creatingThread={creatingThread}
           onSearch={handleSearch}
-          onSelectThread={setActiveThreadId}
+          onSelectThread={(id) => {
+            const th = threads.find((x) => x.id === id);
+            setChatMode((th?.mode || "rag").toLowerCase());
+            setActiveThreadId(id);
+          }}
           onRenameThread={handleRename}
           onDeleteThread={handleDelete}
           onUploadFile={(file) => uploadDocument(file, "private")}

@@ -30,8 +30,11 @@ export async function listThreads(search = "") {
   return res.json();
 }
 
-export async function createThread() {
-  const res = await fetch(`${API_BASE}/conversations`, {
+export async function createThread(mode = "rag") {
+  const url = new URL(`${API_BASE}/conversations`);
+  url.searchParams.set("mode", mode);
+
+  const res = await fetch(url, {
     method: "POST",
     headers: headers(),
   });
@@ -47,6 +50,16 @@ export async function renameThread(threadId, title) {
   });
 
   if (!res.ok) throw new Error(await parseError(res, "Impossible de renommer"));
+  return res.json();
+}
+
+export async function setThreadMode(threadId, mode) {
+  const res = await fetch(`${API_BASE}/conversations/${threadId}/mode`, {
+    method: "PATCH",
+    headers: headers(),
+    body: JSON.stringify({ mode }),
+  });
+  if (!res.ok) throw new Error(await parseError(res, "Impossible de changer le mode"));
   return res.json();
 }
 

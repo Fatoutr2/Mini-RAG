@@ -73,7 +73,7 @@
 
 @media (max-width: 900px) {
   .navbar {
-  grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr auto;
   }
 
   .menu-btn {
