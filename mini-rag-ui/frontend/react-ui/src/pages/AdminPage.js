@@ -15,7 +15,7 @@ import "../assets/css/admin-pages.css";
 
 
 export default function AdminPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [threads, setThreads] = useState([]);
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [searchValue, setSearchValue] = useState("");
@@ -57,7 +57,6 @@ export default function AdminPage() {
       const t = await createThread(chatMode);
       setThreads((prev) => [t, ...prev]);
       setActiveThreadId(t.id);
-      setSidebarOpen(false);
     } finally {
       setCreatingThread(false);
     }
@@ -80,8 +79,8 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="app-layout">
-      <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} chatMode={chatMode} onChatModeChange={setChatMode} />
+    <div className={`app-layout ${sidebarOpen ? "sidebar-open" : ""}`}>
+      <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} chatMode={chatMode} onChatModeChange={setChatMode} sidebarOpen={sidebarOpen} />
 
       <div className="content-row">
         <AdminSidebar

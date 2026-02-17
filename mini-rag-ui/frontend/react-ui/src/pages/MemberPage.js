@@ -7,7 +7,7 @@ import { uploadDocument } from "../services/uploadService";
 import "../assets/css/layout.css";
 
 export default function MemberPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [threads, setThreads] = useState([]);
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [search, setSearch] = useState("");
@@ -69,8 +69,8 @@ export default function MemberPage() {
   };
 
   return (
-    <div className="app-layout">
-      <Navbar role="member" toggle={() => setSidebarOpen(!sidebarOpen)} chatMode={chatMode} onChatModeChange={setChatMode} />
+    <div className={`app-layout ${sidebarOpen ? "sidebar-open" : ""}`}>
+      <Navbar role="member" toggle={() => setSidebarOpen(!sidebarOpen)} chatMode={chatMode} onChatModeChange={setChatMode} sidebarOpen={sidebarOpen} />
       <div className="content-row">
         <MemberSidebar
           open={sidebarOpen}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { MoonIcon, SunIcon } from "./Icons";
 import "../assets/css/navbar.css";
 
-export default function Navbar({ toggle, role = "member", chatMode, onChatModeChange }) {
+export default function Navbar({ toggle, role = "member", chatMode, onChatModeChange, sidebarOpen = true }) {
   const showModeSwitch = typeof onChatModeChange === "function";
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
 
@@ -12,7 +12,7 @@ export default function Navbar({ toggle, role = "member", chatMode, onChatModeCh
   }, [theme]);
 
   return (
-    <header className="navbar">
+    <header className={`navbar ${sidebarOpen ? "with-sidebar" : ""}`}>
       <div className="nav-left">
         <button className="menu-btn" onClick={toggle} aria-label="Ouvrir/Fermer le menu">
           <span />
@@ -36,7 +36,7 @@ export default function Navbar({ toggle, role = "member", chatMode, onChatModeCh
           </div>
         )}
       </div>
-      
+
       <div className="nav-right">
         <button className="theme-btn" onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}>
           {theme === "dark" ? <SunIcon className="w-5" /> : <MoonIcon className="w-5" />}
