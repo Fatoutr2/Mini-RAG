@@ -1,8 +1,10 @@
 import os
+import re
+from pathlib import Path
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 
-from .rag.loaders import load_all_documents, load_db_jobs, load_db_projects
+from .rag.loaders import load_all_documents, load_db_jobs, load_db_projects, load_file
 from .rag.chunking import smart_chunk
 from .rag.embeddings import embed
 from .rag.vectorstore import build_index
@@ -22,6 +24,8 @@ load_dotenv()
 # =========================
 class RAGEngine:
     def __init__(self, public_dir="data/public", private_dir="data/private"):
+        self.public_dir = Path(public_dir)
+        self.private_dir = Path(private_dir)
         self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
         self.public_chunks = []
         self.private_chunks = []
@@ -32,6 +36,111 @@ class RAGEngine:
         self.load_public_data(public_dir)
         if os.path.exists(private_dir):
             self.load_private_data(private_dir)
+
+    def _is_full_file_request(self, question: str) -> bool:
+        q = (question or "").lower()
+        markers = [
+            "fichier entier",
+            "fichier complet",
+            "contenu complet",
+            "en entier",
+            "intégral",
+            "integral",
+            "tout le fichier",
+            "donne-moi le fichier",
+        ]
+        return any(m in q for m in markers)
+
+    def _iter_data_files(self):
+        for data_dir in [self.private_dir, self.public_dir]:
+            if not data_dir.exists():
+                continue
+            for file_path in data_dir.iterdir():
+                if file_path.is_file():
+                    yield file_path
+
+    def _find_file_path(self, question: str, prefer_private: bool = True):
+        # 1) Essayer un nom de fichier explicite dans la question
+        pattern = r"([\w\-. ]+\.(?:txt|pdf|docx|csv|json|xls|xlsx|md))"
+        matched = re.findall(pattern, question or "", flags=re.IGNORECASE)
+        if matched:
+            requested = matched[0].strip().lower()
+            candidates = []
+            for p in self._iter_data_files():
+                if p.name.lower() == requested:
+                    candidates.append(p)
+            if candidates:
+                if prefer_private:
+                    candidates.sort(key=lambda p: 0 if "private" in str(p) else 1)
+                return candidates[0]
+
+        # 2) Fallback: trouver un fichier dont le nom est mentionné partiellement
+        q = (question or "").lower()
+        best = None
+        best_score = 0
+        for p in self._iter_data_files():
+            stem = p.stem.lower()
+            name = p.name.lower()
+            score = 0
+            if name in q:
+                score = len(name)
+            elif stem in q:
+                score = len(stem)
+            if score > best_score:
+                best_score = score
+                best = p
+        return best
+
+    def _load_full_file_text(self, file_path: Path) -> str:
+        loaded = load_file(str(file_path))
+        if isinstance(loaded, str):
+            return loaded.strip()
+        if isinstance(loaded, list):
+            parts = []
+            for item in loaded:
+                if isinstance(item, str) and item.strip():
+                    parts.append(item.strip())
+                elif isinstance(item, dict):
+                    text = item.get("text") or item.get("answer") or ""
+                    if isinstance(text, str) and text.strip():
+                        parts.append(text.strip())
+            return "\n\n".join(parts).strip()
+        return ""
+
+    def _get_files_context(self, file_names, max_chars_per_file: int = 12000) -> str:
+        if not file_names:
+            return ""
+
+        blocks = []
+        for file_name in file_names:
+            if not isinstance(file_name, str) or not file_name.strip():
+                continue
+
+            safe_name = os.path.basename(file_name.strip())
+            found = None
+            for p in self._iter_data_files():
+                if p.name == safe_name:
+                    found = p
+                    break
+
+            if not found:
+                blocks.append(f"[FICHIER INTROUVABLE] {safe_name}")
+                continue
+
+            text = self._load_full_file_text(found)
+            if not text:
+                blocks.append(f"[FICHIER ILLISIBLE OU VIDE] {safe_name}")
+                continue
+
+            truncated = False
+            if len(text) > max_chars_per_file:
+                text = text[:max_chars_per_file]
+                truncated = True
+
+            suffix = "\n[NOTE: contenu tronqué pour limite de contexte]" if truncated else ""
+            blocks.append(f"[FICHIER: {safe_name}]\n{text}{suffix}")
+
+        return "\n\n".join(blocks)
 
     # =========================
     # PUBLIC
@@ -167,12 +276,22 @@ class RAGEngine:
     # =========================
     # ASK PRIVATE
     # =========================
-    def ask(self, question: str):
+    def ask(self, question: str, file_names=None):
 
         intent = detect_social_intent(question)
         if intent:
             return social_response(intent)
         
+        if self._is_full_file_request(question):
+            full_file_path = self._find_file_path(question)
+            if full_file_path:
+                full_text = self._load_full_file_text(full_file_path)
+                if full_text:
+                    return (
+                        f"Voici le contenu intégral de **{full_file_path.name}** :\n\n"
+                        f"```text\n{full_text}\n```"
+                    )
+
         if not self.private_chunks:
             return "Je n'ai pas cette information 😔"
 
@@ -195,20 +314,30 @@ class RAGEngine:
     # =========================
     # ASK CHAT (LLM PUR)
     # =========================
-    def ask_chat(self, question: str):
+    def ask_chat(self, question: str, file_names=None):
         intent = detect_social_intent(question)
         if intent:
             return social_response(intent)
+
+        files_context = self._get_files_context(file_names or [])
 
         system_prompt = (
             "Tu es SmartIA Assistant, un assistant conversationnel général en français. "
             "Réponds de façon claire, utile et concise. "
             "Si l'utilisateur demande du code, donne une réponse structurée et pratique."
+            "Si des fichiers sont fournis, appuie-toi dessus de manière explicite."
         )
+
+        user_content = question
+        if files_context:
+            user_content = (
+                f"Question utilisateur:\n{question}\n\n"
+                f"Contexte fichiers fournis:\n{files_context}"
+            )
 
         response = create_response([
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": question},
+                {"role": "user", "content": user_content},
             ], temperature=0.4)
 
         return response.output_text.strip() or "Je n'ai pas pu générer de réponse pour le moment."

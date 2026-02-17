@@ -1,6 +1,7 @@
 import os
 import time
 from pathlib import Path
+from typing import List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, APIRouter, Query as FastQuery, UploadFile, File, Form
 from pydantic import BaseModel
@@ -29,6 +30,7 @@ class Query(BaseModel):
 
 class AskPayload(BaseModel):
     question: str
+    file_names: Optional[List[str]] = None
 
 class RenamePayload(BaseModel):
     title: str
@@ -144,7 +146,7 @@ def send_message(thread_id: int, payload: AskPayload, user=Depends(get_current_u
     if user["role"] == "visitor":
         raise HTTPException(403, "Connexion requise")
 
-    answer = rag.ask(payload.question)
+    answer = rag.ask(payload.question, file_names=payload.file_names or [])
     append_message_and_answer(
         user_id=user["user_id"],
         thread_id=thread_id,
@@ -159,7 +161,7 @@ def send_message_rag(thread_id: int, payload: AskPayload, user=Depends(get_curre
     if user["role"] == "visitor":
         raise HTTPException(403, "Connexion requise")
 
-    answer = rag.ask(payload.question)
+    answer = rag.ask(payload.question, file_names=payload.file_names or [])
     append_message_and_answer(
         user_id=user["user_id"],
         thread_id=thread_id,
@@ -174,7 +176,7 @@ def send_message_chat(thread_id: int, payload: AskPayload, user=Depends(get_curr
     if user["role"] == "visitor":
         raise HTTPException(403, "Connexion requise")
 
-    answer = rag.ask_chat(payload.question)
+    answer = rag.ask_chat(payload.question, file_names=payload.file_names or [])
     append_message_and_answer(
         user_id=user["user_id"],
         thread_id=thread_id,

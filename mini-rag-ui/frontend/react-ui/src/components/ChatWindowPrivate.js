@@ -2,14 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import { FileIcon, SendIcon } from "./Icons";
 import "../assets/css/chat.css";
 import { getMessages, sendMessageChat, sendMessageRag } from "../services/chatService";
+import { uploadDocument } from "../services/uploadService";
 
 function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefresh, mode = "rag" }) {
   const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [error, setError] = useState("");
 
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -19,6 +23,7 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
     const load = async () => {
       if (!activeThreadId) {
         setMessages([]);
+        setSelectedFiles([]);
         return;
       }
       try {
@@ -32,18 +37,47 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
     load();
   }, [activeThreadId]);
 
+  const handleFilePick = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    setError("");
+
+    try {
+      const result = await uploadDocument(file, "private");
+      const uploadedName = result?.filename || file.name;
+      setSelectedFiles((prev) => {
+        if (prev.includes(uploadedName)) return prev;
+        return [...prev, uploadedName];
+      });
+    } catch (err) {
+      setError(err.message || "Upload fichier impossible");
+    } finally {
+      setUploadingFile(false);
+      e.target.value = "";
+    }
+  };
+
   const handleSend = async (forcedText = null) => {
     const text = (forcedText ?? question).trim();
     if (!text || loading || !activeThreadId) return;
 
-    setMessages((prev) => [...prev, { role: "user", content: text }]);
+    const filesForRequest = [...selectedFiles];
+    const fileNote = filesForRequest.length ? `\n\n📎 Fichiers joints: ${filesForRequest.join(", ")}` : "";
+
+    setMessages((prev) => [...prev, { role: "user", content: `${text}${fileNote}` }]);
     setQuestion("");
     setLoading(true);
     setError("");
 
     try {
-      const data = mode === "chat" ? await sendMessageChat(activeThreadId, text) : await sendMessageRag(activeThreadId, text);
+      const data = mode === "chat" 
+        ? await sendMessageChat(activeThreadId, text, filesForRequest) 
+        : await sendMessageRag(activeThreadId, text, filesForRequest);
+
       setMessages((prev) => [...prev, { role: "assistant", content: data.answer || "" }]);
+      setSelectedFiles([]);
       if (onThreadAutoTitleRefresh) onThreadAutoTitleRefresh();
     } catch (err) {
       setError(err.message || "Erreur serveur");
@@ -71,7 +105,7 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
             <p>Posez des questions sur vos documents ou discutez librement avec SmartIA.</p>
             <div className="suggestion-grid">
               <button className="suggestion-card" onClick={() => setQuestion("Peux-tu m'aider à analyser un document ?")}>📑<strong>Analyser un document</strong><span>Chargez un PDF puis posez des questions ciblées.</span></button>
-              <button className="suggestion-card" onClick={() => setQuestion("Donne-moi un résumé des points clés")}>🔍<strong>Synthèse rapide</strong><span>Résume automatiquement les points importants.</span></button>
+              <button className="suggestion-card" onClick={() => setQuestion("Donne-moi le fichier complet contrat-prestataire.pdf")}>📂<strong>Donner un fichier complet</strong><span>Demandez « donne-moi le fichier complet NOM_FICHIER ».</span></button>
             </div>
           </div>
         ) : (
@@ -93,8 +127,33 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
         <div ref={messagesEndRef} />
       </div>
 
+      {selectedFiles.length > 0 && (
+        <div className="attached-files-row">
+          {selectedFiles.map((name) => (
+            <span key={name} className="file-chip">
+              {name}
+              <button type="button" onClick={() => setSelectedFiles((prev) => prev.filter((f) => f !== name))}>✕</button>
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="chat-input-area">
-        <button className="attach-btn" type="button" aria-label="Ajouter un fichier"><FileIcon className="icon-18" /></button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          style={{ display: "none" }}
+          onChange={handleFilePick}
+        />
+        <button
+          className="attach-btn"
+          type="button"
+          aria-label="Ajouter un fichier"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploadingFile || !activeThreadId}
+        >
+          <FileIcon className="icon-18" />
+        </button>
         <textarea
           rows={1}
           placeholder={activeThreadId ? "Envoyer un message..." : "Créez un nouveau chat d'abord..."}
