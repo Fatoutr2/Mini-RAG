@@ -1,4 +1,3 @@
-/* ================= ROOT ================= */
 .app-layout {
   height: 100vh;
   display: flex;
@@ -7,20 +6,22 @@
   color: var(--text-main);
 }
 
-/* ================= CONTENT ================= */
 .content-row {
   flex: 1;
   display: flex;
   min-height: 0;
+  transition: padding-left .25s ease;
 }
 
+.app-layout.sidebar-open .content-row {
+  padding-left: 300px;
+}
 
-
-/* ================= MOBILE ================= */
 @media (max-width: 900px) {
 
   .content-row {
     position: relative;
+    padding-left: 0 !important;
   }
 
   .sidebar {
