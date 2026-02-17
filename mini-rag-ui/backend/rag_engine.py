@@ -65,6 +65,24 @@ class RAGEngine:
         ]
         return any(q.startswith(marker) for marker in followup_markers)
 
+    def _extract_topic_from_question(self, question: str) -> str:
+        q = (question or "").strip()
+        if not q:
+            return ""
+
+        patterns = [
+            r"projet\s+([\w\-]+)",
+            r"sur\s+(?:le\s+projet\s+)?([\w\-]+)",
+            r"concernant\s+([\w\-]+)",
+        ]
+
+        for pattern in patterns:
+            m = re.search(pattern, q, flags=re.IGNORECASE)
+            if m:
+                return (m.group(1) or "").strip(" .?!,;:")
+
+        return ""
+
     def _contextualize_question(self, question: str, history_user_questions=None) -> str:
         """
         Recompose une question suivie (ex: "et sur jobmatchai ?")
@@ -82,8 +100,19 @@ class RAGEngine:
         if not previous:
             return question
 
-        # Si la nouvelle question contient déjà le verbe d'intention, on garde tel quel.
+        # Résolution de références vagues "ça / ceci / ce projet"
         q_low = question.lower()
+        has_vague_reference = any(token in q_low for token in [" ça", "ça", "cela", "ce projet", "celui", "celle-ci", "dessus"])
+        if has_vague_reference:
+            last_topic = self._extract_topic_from_question(previous)
+            if last_topic:
+                if "qui travaille" in q_low:
+                    return f"Qui travaille sur le projet {last_topic} ?"
+                if "en plus" in q_low or "plus" in q_low:
+                    return f"Donne-moi plus de détails sur le projet {last_topic}."
+                return f"{question.strip()} sur le projet {last_topic}"
+
+        # Si la nouvelle question contient déjà le verbe d'intention, on garde tel quel.
         if any(v in q_low for v in ["qui travaille", "qui est", "combien", "quand", "où", "comment"]):
             return question
 
