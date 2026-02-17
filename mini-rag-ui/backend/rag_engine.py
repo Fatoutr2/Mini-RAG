@@ -49,9 +49,52 @@ class RAGEngine:
             "integral",
             "tout le fichier",
             "donne-moi le fichier",
-            "le fichier",
         ]
         return any(m in q for m in markers)
+
+    def _is_followup_question(self, question: str) -> bool:
+        q = (question or "").strip().lower()
+        followup_markers = [
+            "et ",
+            "et sur",
+            "et pour",
+            "et ce projet",
+            "et celui",
+            "lui",
+            "celle-ci",
+        ]
+        return any(q.startswith(marker) for marker in followup_markers)
+
+    def _contextualize_question(self, question: str, history_user_questions=None) -> str:
+        """
+        Recompose une question suivie (ex: "et sur jobmatchai ?")
+        à partir de la dernière intention utilisateur explicite.
+        """
+        if not self._is_followup_question(question):
+            return question
+
+        history_user_questions = history_user_questions or []
+        if not history_user_questions:
+            return question
+
+        # On prend la dernière question utilisateur significative.
+        previous = (history_user_questions[-1] or "").strip()
+        if not previous:
+            return question
+
+        # Si la nouvelle question contient déjà le verbe d'intention, on garde tel quel.
+        q_low = question.lower()
+        if any(v in q_low for v in ["qui travaille", "qui est", "combien", "quand", "où", "comment"]):
+            return question
+
+        # Hérite d'une intention explicite de type "qui travaille ..."
+        prev_low = previous.lower()
+        if "qui travaille" in prev_low:
+            return f"Qui travaille {question.strip()}"
+        if "qui est" in prev_low:
+            return f"Qui est concerné {question.strip()}"
+
+        return f"En tenant compte de la question précédente: {question.strip()}"
 
     def _iter_data_files(self):
         for data_dir in [self.private_dir, self.public_dir]:
@@ -278,7 +321,9 @@ class RAGEngine:
     # =========================
     # ASK PRIVATE
     # =========================
-    def ask(self, question: str, file_names=None):
+    def ask(self, question: str, file_names=None, history_user_questions=None):
+
+        question = self._contextualize_question(question, history_user_questions)
 
         intent = detect_social_intent(question)
         if is_pure_social_message(question, intent):
@@ -324,7 +369,8 @@ class RAGEngine:
     # =========================
     # ASK CHAT (LLM PUR)
     # =========================
-    def ask_chat(self, question: str, file_names=None):
+    def ask_chat(self, question: str, file_names=None, history_user_questions=None):
+        question = self._contextualize_question(question, history_user_questions)
         intent = detect_social_intent(question)
         if is_pure_social_message(question, intent):
             return social_response(intent)

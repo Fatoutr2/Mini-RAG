@@ -146,7 +146,14 @@ def send_message(thread_id: int, payload: AskPayload, user=Depends(get_current_u
     if user["role"] == "visitor":
         raise HTTPException(403, "Connexion requise")
 
-    answer = rag.ask(payload.question, file_names=payload.file_names or [])
+    messages = get_thread_messages(user["user_id"], thread_id)
+    history_user_questions = [m["content"] for m in messages if m.get("role") == "user"]
+
+    answer = rag.ask(
+        payload.question,
+        file_names=payload.file_names or [],
+        history_user_questions=history_user_questions,
+    )
     append_message_and_answer(
         user_id=user["user_id"],
         thread_id=thread_id,
@@ -161,7 +168,14 @@ def send_message_rag(thread_id: int, payload: AskPayload, user=Depends(get_curre
     if user["role"] == "visitor":
         raise HTTPException(403, "Connexion requise")
 
-    answer = rag.ask(payload.question, file_names=payload.file_names or [])
+    messages = get_thread_messages(user["user_id"], thread_id)
+    history_user_questions = [m["content"] for m in messages if m.get("role") == "user"]
+
+    answer = rag.ask(
+        payload.question,
+        file_names=payload.file_names or [],
+        history_user_questions=history_user_questions,
+    )
     append_message_and_answer(
         user_id=user["user_id"],
         thread_id=thread_id,
@@ -176,7 +190,14 @@ def send_message_chat(thread_id: int, payload: AskPayload, user=Depends(get_curr
     if user["role"] == "visitor":
         raise HTTPException(403, "Connexion requise")
 
-    answer = rag.ask_chat(payload.question, file_names=payload.file_names or [])
+    messages = get_thread_messages(user["user_id"], thread_id)
+    history_user_questions = [m["content"] for m in messages if m.get("role") == "user"]
+
+    answer = rag.ask_chat(
+        payload.question,
+        file_names=payload.file_names or [],
+        history_user_questions=history_user_questions,
+    )
     append_message_and_answer(
         user_id=user["user_id"],
         thread_id=thread_id,
