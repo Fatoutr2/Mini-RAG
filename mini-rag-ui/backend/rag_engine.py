@@ -11,7 +11,7 @@ from .rag.vectorstore import build_index
 from .rag.retriever import retrieve
 from .rag.reranker import rerank
 from .rag.prompt import build_prompt
-from .rag.social import detect_social_intent, social_response
+from .rag.social import detect_social_intent, social_response, is_pure_social_message
 from .llm_client import create_response
 
 # =========================
@@ -24,6 +24,7 @@ load_dotenv()
 # =========================
 class RAGEngine:
     def __init__(self, public_dir="data/public", private_dir="data/private"):
+        base_dir = Path(__file__).resolve().parents[1]
         self.public_dir = Path(public_dir)
         self.private_dir = Path(private_dir)
         self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
@@ -48,6 +49,7 @@ class RAGEngine:
             "integral",
             "tout le fichier",
             "donne-moi le fichier",
+            "le fichier",
         ]
         return any(m in q for m in markers)
 
@@ -238,7 +240,7 @@ class RAGEngine:
     def ask_public(self, question: str):
 
         intent = detect_social_intent(question)
-        if intent:
+        if is_pure_social_message(question, intent):
             return social_response(intent)
 
         if not self.public_chunks:
@@ -279,11 +281,19 @@ class RAGEngine:
     def ask(self, question: str, file_names=None):
 
         intent = detect_social_intent(question)
-        if intent:
+        if is_pure_social_message(question, intent):
             return social_response(intent)
         
         if self._is_full_file_request(question):
             full_file_path = self._find_file_path(question)
+
+            if not full_file_path and file_names:
+                first_name = os.path.basename((file_names[0] or "").strip())
+                for p in self._iter_data_files():
+                    if p.name == first_name:
+                        full_file_path = p
+                        break
+
             if full_file_path:
                 full_text = self._load_full_file_text(full_file_path)
                 if full_text:
@@ -316,7 +326,7 @@ class RAGEngine:
     # =========================
     def ask_chat(self, question: str, file_names=None):
         intent = detect_social_intent(question)
-        if intent:
+        if is_pure_social_message(question, intent):
             return social_response(intent)
 
         files_context = self._get_files_context(file_names or [])
@@ -325,7 +335,9 @@ class RAGEngine:
             "Tu es SmartIA Assistant, un assistant conversationnel général en français. "
             "Réponds de façon claire, utile et concise. "
             "Si l'utilisateur demande du code, donne une réponse structurée et pratique."
-            "Si des fichiers sont fournis, appuie-toi dessus de manière explicite."
+            "Si des fichiers sont fournis, considère que leur contenu est disponible dans le contexte. "
+            "N'affirme jamais que tu ne peux pas accéder aux fichiers si du contexte fichier est présent ; "
+            "utilise ce contexte explicitement dans ta réponse."
         )
 
         user_content = question

@@ -23,6 +23,28 @@ def detect_social_intent(text: str):
                 return intent
     return None
 
+
+def is_pure_social_message(text: str, intent: str | None) -> bool:
+    """
+    Retourne True uniquement si le message est essentiellement social
+    (ex: "bonjour", "merci", "au revoir"), sans vraie demande métier.
+    """
+    if not intent:
+        return False
+
+    lowered = (text or "").lower()
+
+    # Supprimer les expressions sociales reconnues
+    for pattern in SOCIAL_PATTERNS.get(intent, []):
+        lowered = re.sub(pattern, " ", lowered)
+
+    # Nettoyage ponctuation / emojis / espaces
+    lowered = re.sub(r"[^\w\s]", " ", lowered)
+    lowered = re.sub(r"\s+", " ", lowered).strip()
+
+    # Si après nettoyage il ne reste rien -> c'est purement social.
+    return lowered == ""
+
 def social_response(intent: str):
     responses = {
         "greeting": "Bonjour 👋 Je suis votre assistant IA. En quoi puis-je vous aider ?",
