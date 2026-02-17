@@ -117,6 +117,7 @@ import Index from "./pages/Index";
 import AccessPage from "./pages/AccessPage";
 import Members from "./pages/Members";
 import Admins from "./pages/Admins";
+import LoginPage from "./pages/LoginPage";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminRoute from "./routes/AdminRoute";
@@ -125,6 +126,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
+      <Route path="/login" element={<LoginPage />} />
 
       <Route
         path="/member"

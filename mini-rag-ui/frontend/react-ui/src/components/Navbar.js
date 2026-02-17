@@ -14,32 +14,29 @@ export default function Navbar({ toggle, role = "member", chatMode, onChatModeCh
   return (
     <header className="navbar">
       <div className="nav-left">
-        <button className="menu-btn" onClick={toggle} aria-label="Ouvrir le menu">
+        <button className="menu-btn" onClick={toggle} aria-label="Ouvrir/Fermer le menu">
           <span />
           <span />
           <span />
         </button>
-        <div className="nav-brand" onClick={() => window.location.reload()}>
-          (•‿•) SmartIA
-        </div>
-      </div>
 
-      {showModeSwitch && (
-        <div className="nav-center-wrap">
-          <div className="nav-center">
-            <button className={`mode-chip ${chatMode === "rag" ? "active" : ""}`} onClick={() => onChatModeChange("rag")} type="button">
-              📚 RAG
-            </button>
-            <button className={`mode-chip ${chatMode === "chat" ? "active" : ""}`} onClick={() => onChatModeChange("chat")} type="button">
-              💬 Chat
-            </button>
+        {showModeSwitch && (
+          <div className="nav-center-inline">
+            <div className="nav-center">
+              <button className={`mode-chip ${chatMode === "rag" ? "active" : ""}`} onClick={() => onChatModeChange("rag")} type="button">
+                📚 RAG
+              </button>
+              <button className={`mode-chip ${chatMode === "chat" ? "active" : ""}`} onClick={() => onChatModeChange("chat")} type="button">
+                💬 Chat
+              </button>
+            </div>
+            <span className="mode-hint">
+              Mode actuel : <strong>{chatMode === "rag" ? "📚 RAG" : "💬 Discussion"}</strong>
+            </span>
           </div>
-          <span className="mode-hint">
-            Mode actuel : <strong>{chatMode === "rag" ? "📚 RAG" : "💬 Discussion"}</strong>
-          </span>
-        </div>
-      )}
-
+        )}
+      </div>
+      
       <div className="nav-right">
         <button className="theme-btn" onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}>
           {theme === "dark" ? <SunIcon className="w-5" /> : <MoonIcon className="w-5" />}

@@ -56,7 +56,7 @@ export default function MemberSidebar({
         <button className="close-btn" onClick={onClose}>✕</button>
       </div>
 
-      <div className="sidebar-logo">(•_•) SmartIA</div>
+      <div className="sidebar-logo">(•‿•) SmartIA</div>
 
       <div className="sidebar-top">
         <button className="sidebar-btn primary" onClick={onNewChat} disabled={creatingThread}>
