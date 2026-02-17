@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import AdminSidebar from "../components/AdminSidebar";
 import { deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
-import { listThreads, createThread, renameThread, deleteThread } from "../services/chatService";
+import { listThreads, createThread, renameThread, deleteThread, setThreadMode } from "../services/chatService";
 import { uploadDocument } from "../services/uploadService";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
 export default function Admins() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ export default function Admins() {
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [searchValue, setSearchValue] = useState("");
   const [creatingThread, setCreatingThread] = useState(false);
+  const [chatMode, setChatMode] = useState("rag");
 
 
   const load = async () => {
@@ -68,6 +69,16 @@ export default function Admins() {
   useEffect(() => {
     refreshThreads("");
   }, []);
+  useEffect(() => {
+    const active = threads.find((t) => t.id === activeThreadId);
+    if (active?.mode) setChatMode(String(active.mode).toLowerCase());
+  }, [threads, activeThreadId]);
+
+  useEffect(() => {
+    if (!activeThreadId) return;
+    setThreadMode(activeThreadId, chatMode).catch(() => {});
+  }, [activeThreadId, chatMode]);
+
 
   const handleNewChat = async (e) => {
     e?.preventDefault?.();
@@ -76,7 +87,7 @@ export default function Admins() {
 
     setCreatingThread(true);
     try {
-      const t = await createThread();
+      const t = await createThread(chatMode);
       setThreads((prev) => [t, ...prev]);
       setActiveThreadId(t.id);
       navigate(`/admin?threadId=${t.id}`);
@@ -103,8 +114,8 @@ export default function Admins() {
 
 
   return (
-    <div className="app-layout">
-      <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} />
+    <div className={`app-layout ${sidebarOpen ? "sidebar-open" : ""}`}>
+      <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} chatMode={chatMode} onChatModeChange={setChatMode} sidebarOpen={sidebarOpen} />
       <div className="content-row">
         <AdminSidebar
           open={sidebarOpen}

@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import AdminSidebar from "../components/AdminSidebar";
 import { createUser, deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
-import { listThreads, createThread, renameThread, deleteThread } from "../services/chatService";
+import { listThreads, createThread, renameThread, deleteThread, setThreadMode } from "../services/chatService";
 import { uploadDocument } from "../services/uploadService";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
 export default function AccessPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,6 +19,7 @@ export default function AccessPage() {
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [searchValue, setSearchValue] = useState("");
   const [creatingThread, setCreatingThread] = useState(false);
+  const [chatMode, setChatMode] = useState("rag");
   const loadUsers = async () => {
     try {
       setError("");
@@ -88,7 +89,7 @@ export default function AccessPage() {
 
     setCreatingThread(true);
     try {
-        const t = await createThread();
+        const t = await createThread(chatMode);
         setThreads((prev) => [t, ...prev]);
         setActiveThreadId(t.id);
         navigate(`/admin?threadId=${t.id}`);
@@ -115,8 +116,8 @@ export default function AccessPage() {
 
 
   return (
-    <div className="app-layout">
-      <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} />
+    <div className={`app-layout ${sidebarOpen ? "sidebar-open" : ""}`}>
+      <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} chatMode={chatMode} onChatModeChange={setChatMode} sidebarOpen={sidebarOpen} />
       <div className="content-row">
         <AdminSidebar
             open={sidebarOpen}
