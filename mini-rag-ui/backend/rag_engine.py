@@ -181,6 +181,20 @@ class RAGEngine:
             return "\n\n".join(parts).strip()
         return ""
 
+
+    def refresh_data(self, visibility: str = "private"):
+        normalized = (visibility or "private").strip().lower()
+
+        if normalized == "public":
+            self.load_public_data(str(self.public_dir))
+            return
+
+        if normalized == "private":
+            self.load_private_data(str(self.private_dir))
+            return
+
+        raise ValueError("visibility must be 'public' or 'private'")
+
     def _get_files_context(self, file_names, max_chars_per_file: int = 12000) -> str:
         if not file_names:
             return ""

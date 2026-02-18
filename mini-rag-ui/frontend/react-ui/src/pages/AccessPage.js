@@ -68,6 +68,20 @@ export default function AccessPage() {
     await loadUsers();
   };
 
+  const onToggleAccess = async (u) => {
+    const nextState = !u.is_active;
+    const actionLabel = nextState ? "activer" : "désactiver";
+    if (!window.confirm(`Voulez-vous ${actionLabel} l'accès de ${u.email} ?`)) return;
+
+    try {
+      setError("");
+      await updateUser(u.id, { is_active: nextState });
+      await loadUsers();
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
   const refreshThreads = async (search = "") => {
     const data = await listThreads(search);
     setThreads(data);
@@ -208,6 +222,12 @@ export default function AccessPage() {
                         <div className="admin-actions">
                           <button className="admin-btn" onClick={() => onEdit(u)}>Modifier</button>
                           <button className="admin-btn" onClick={() => onRole(u)}>Changer rôle</button>
+                          <button
+                            className={`admin-btn ${u.is_active ? "danger" : "primary"}`}
+                            onClick={() => onToggleAccess(u)}
+                          >
+                            {u.is_active ? "Désactiver accès" : "Activer accès"}
+                          </button>
                           <button className="admin-btn danger" onClick={() => onDelete(u)}>Supprimer</button>
                         </div>
                       </td>

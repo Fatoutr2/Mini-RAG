@@ -93,8 +93,13 @@ async def upload_document(
     content = await file.read()
     destination.write_bytes(content)
 
+    try:
+        rag.refresh_data(normalized_visibility)
+    except Exception as exc:
+        raise HTTPException(500, f"Fichier déposé mais indexation échouée: {exc}")
+
     return {
-        "message": "Fichier déposé",
+        "message": "Fichier déposé et indexé",
         "path": str(destination.relative_to(BASE_DIR)),
         "visibility": normalized_visibility,
         "filename": filename,
