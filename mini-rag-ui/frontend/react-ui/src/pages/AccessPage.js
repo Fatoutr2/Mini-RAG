@@ -288,7 +288,7 @@ export default function AccessPage() {
 
           <section className="admin-card">
             <div className="admin-files-header">
-              <h2 className="admin-card-title">Gestion des fichiers (RAG)</h2>
+              <h2 className="admin-card-title">Gestion des fichiers</h2>
               <div className="admin-files-actions">
                 <select
                   className="admin-select"
