@@ -35,6 +35,10 @@ class AskPayload(BaseModel):
 class RenamePayload(BaseModel):
     title: str
 
+
+class RenameFilePayload(BaseModel):
+    new_name: str
+
 # -------- PUBLIC ROUTES (VISITOR) --------
 @app.get("/public/company-info")
 def company_info():
@@ -105,6 +109,113 @@ async def upload_document(
         "filename": filename,
     }
 
+
+
+@app.get("/admin/files")
+def list_admin_files(
+    visibility: str = FastQuery(default="private"),
+    user=Depends(get_current_user),
+):
+    if user["role"] != "admin":
+        raise HTTPException(403, "Accès admin requis")
+
+    normalized_visibility = (visibility or "private").strip().lower()
+    if normalized_visibility not in ["public", "private"]:
+        raise HTTPException(400, "visibility doit être 'public' ou 'private'")
+
+    target_dir = BASE_DIR / "data" / normalized_visibility
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    files = []
+    for file_path in sorted(target_dir.iterdir(), key=lambda p: p.name.lower()):
+        if not file_path.is_file():
+            continue
+        stats = file_path.stat()
+        files.append({
+            "filename": file_path.name,
+            "visibility": normalized_visibility,
+            "size": stats.st_size,
+            "updated_at": int(stats.st_mtime),
+        })
+
+    return {"files": files}
+
+
+@app.delete("/admin/files/{visibility}/{filename}")
+def delete_admin_file(visibility: str, filename: str, user=Depends(get_current_user)):
+    if user["role"] != "admin":
+        raise HTTPException(403, "Accès admin requis")
+
+    normalized_visibility = (visibility or "").strip().lower()
+    if normalized_visibility not in ["public", "private"]:
+        raise HTTPException(400, "visibility doit être 'public' ou 'private'")
+
+    safe_name = os.path.basename(filename or "")
+    if not safe_name:
+        raise HTTPException(400, "Nom de fichier invalide")
+
+    target_dir = BASE_DIR / "data" / normalized_visibility
+    file_path = target_dir / safe_name
+
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(404, "Fichier introuvable")
+
+    file_path.unlink()
+
+    try:
+        rag.refresh_data(normalized_visibility)
+    except Exception as exc:
+        raise HTTPException(500, f"Fichier supprimé mais réindexation échouée: {exc}")
+
+    return {
+        "message": "Fichier supprimé et index mis à jour",
+        "visibility": normalized_visibility,
+        "filename": safe_name,
+    }
+
+
+@app.patch("/admin/files/{visibility}/{filename}")
+def rename_admin_file(
+    visibility: str,
+    filename: str,
+    payload: RenameFilePayload,
+    user=Depends(get_current_user),
+):
+    if user["role"] != "admin":
+        raise HTTPException(403, "Accès admin requis")
+
+    normalized_visibility = (visibility or "").strip().lower()
+    if normalized_visibility not in ["public", "private"]:
+        raise HTTPException(400, "visibility doit être 'public' ou 'private'")
+
+    old_name = os.path.basename(filename or "")
+    new_name = os.path.basename((payload.new_name or "").strip())
+    if not old_name or not new_name:
+        raise HTTPException(400, "Nom de fichier invalide")
+
+    target_dir = BASE_DIR / "data" / normalized_visibility
+    src = target_dir / old_name
+    dst = target_dir / new_name
+
+    if not src.exists() or not src.is_file():
+        raise HTTPException(404, "Fichier introuvable")
+
+    if dst.exists():
+        raise HTTPException(409, "Un fichier avec ce nom existe déjà")
+
+    src.rename(dst)
+
+    try:
+        rag.refresh_data(normalized_visibility)
+    except Exception as exc:
+        raise HTTPException(500, f"Fichier renommé mais réindexation échouée: {exc}")
+
+    return {
+        "message": "Fichier renommé et index mis à jour",
+        "visibility": normalized_visibility,
+        "old_filename": old_name,
+        "filename": new_name,
+    }
 
 
 # -------- VISTOR --------

@@ -5,6 +5,7 @@ import AdminSidebar from "../components/AdminSidebar";
 import { createUser, deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
 import { listThreads, createThread, renameThread, deleteThread, setThreadMode } from "../services/chatService";
 import { uploadDocument } from "../services/uploadService";
+import { deleteUploadedFile, listUploadedFiles, renameUploadedFile } from "../services/adminFileService";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
@@ -20,6 +21,9 @@ export default function AccessPage() {
   const [searchValue, setSearchValue] = useState("");
   const [creatingThread, setCreatingThread] = useState(false);
   const [chatMode, setChatMode] = useState("rag");
+  const [fileVisibility, setFileVisibility] = useState("private");
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [filesLoading, setFilesLoading] = useState(false);
   const loadUsers = async () => {
     try {
       setError("");
@@ -30,9 +34,27 @@ export default function AccessPage() {
     }
   };
 
+
+  const loadFiles = async (visibility = fileVisibility) => {
+    try {
+      setFilesLoading(true);
+      setError("");
+      const data = await listUploadedFiles(visibility);
+      setUploadedFiles(data?.files || []);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setFilesLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadUsers();
   }, []);
+
+  useEffect(() => {
+    loadFiles(fileVisibility);
+  }, [fileVisibility]);
 
   const onCreate = async (e) => {
     e.preventDefault();
@@ -77,6 +99,32 @@ export default function AccessPage() {
       setError("");
       await updateUser(u.id, { is_active: nextState });
       await loadUsers();
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+
+  const onDeleteFile = async (file) => {
+    if (!window.confirm(`Supprimer le fichier ${file.filename} ?`)) return;
+
+    try {
+      setError("");
+      await deleteUploadedFile(file.visibility, file.filename);
+      await loadFiles(fileVisibility);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  const onRenameFile = async (file) => {
+    const nextName = prompt("Nouveau nom du fichier", file.filename);
+    if (!nextName) return;
+
+    try {
+      setError("");
+      await renameUploadedFile(file.visibility, file.filename, nextName.trim());
+      await loadFiles(fileVisibility);
     } catch (e) {
       setError(e.message);
     }
@@ -229,6 +277,62 @@ export default function AccessPage() {
                             {u.is_active ? "Désactiver accès" : "Activer accès"}
                           </button>
                           <button className="admin-btn danger" onClick={() => onDelete(u)}>Supprimer</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="admin-card">
+            <div className="admin-files-header">
+              <h2 className="admin-card-title">Gestion des fichiers (RAG)</h2>
+              <div className="admin-files-actions">
+                <select
+                  className="admin-select"
+                  value={fileVisibility}
+                  onChange={(e) => setFileVisibility(e.target.value)}
+                >
+                  <option value="private">private</option>
+                  <option value="public">public</option>
+                </select>
+                <button className="admin-btn" onClick={() => loadFiles(fileVisibility)} disabled={filesLoading}>
+                  {filesLoading ? "Chargement..." : "Actualiser"}
+                </button>
+              </div>
+            </div>
+
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Fichier</th>
+                    <th>Visibilité</th>
+                    <th>Taille (bytes)</th>
+                    <th>Mis à jour</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {!filesLoading && uploadedFiles.length === 0 && (
+                    <tr>
+                      <td colSpan={5}>Aucun fichier trouvé.</td>
+                    </tr>
+                  )}
+                  {uploadedFiles.map((file) => (
+                    <tr key={`${file.visibility}-${file.filename}`}>
+                      <td>{file.filename}</td>
+                      <td>
+                        <span className={`visibility-badge ${file.visibility}`}>{file.visibility}</span>
+                      </td>
+                      <td>{file.size}</td>
+                      <td>{file.updated_at ? new Date(file.updated_at * 1000).toLocaleString() : "-"}</td>
+                      <td>
+                        <div className="admin-actions">
+                          <button className="admin-btn" onClick={() => onRenameFile(file)}>Renommer</button>
+                          <button className="admin-btn danger" onClick={() => onDeleteFile(file)}>Supprimer</button>
                         </div>
                       </td>
                     </tr>
