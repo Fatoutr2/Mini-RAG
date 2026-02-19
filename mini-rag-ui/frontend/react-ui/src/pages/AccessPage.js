@@ -12,7 +12,7 @@ import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
 export default function AccessPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 900);
   const { t, lang } = useI18n();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
@@ -28,11 +28,12 @@ export default function AccessPage() {
   const [filesLoading, setFilesLoading] = useState(false);
   const [userSearch, setUserSearch] = useState("");
   const [fileSearch, setFileSearch] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [expandedUserId, setExpandedUserId] = useState(null);
   const [userMenuOpenFor, setUserMenuOpenFor] = useState(null);
   const [fileMenuOpenFor, setFileMenuOpenFor] = useState(null);
   const userMenuRef = useRef(null);
   const fileMenuRef = useRef(null);
+
   const loadUsers = async () => {
     try {
       setError("");
@@ -42,7 +43,6 @@ export default function AccessPage() {
       setError(e.message);
     }
   };
-
 
   const loadFiles = async (visibility = fileVisibility) => {
     try {
@@ -63,13 +63,10 @@ export default function AccessPage() {
 
   useEffect(() => {
     const closeMenus = (e) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-        setUserMenuOpenFor(null);
-      }
-      if (fileMenuRef.current && !fileMenuRef.current.contains(e.target)) {
-        setFileMenuOpenFor(null);
-      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenuOpenFor(null);
+      if (fileMenuRef.current && !fileMenuRef.current.contains(e.target)) setFileMenuOpenFor(null);
     };
+
     document.addEventListener("mousedown", closeMenus);
     return () => document.removeEventListener("mousedown", closeMenus);
   }, []);
@@ -132,17 +129,11 @@ export default function AccessPage() {
     return users.filter((u) => `${u.email} ${u.role} ${u.id}`.toLowerCase().includes(q));
   }, [users, userSearch]);
 
-  const selectedUser = useMemo(
-    () => users.find((u) => u.id === selectedUserId) || filteredUsers[0] || null,
-    [users, selectedUserId, filteredUsers]
-  );
-
   const filteredFiles = useMemo(() => {
     const q = fileSearch.trim().toLowerCase();
     if (!q) return uploadedFiles;
     return uploadedFiles.filter((file) => `${file.filename} ${file.visibility}`.toLowerCase().includes(q));
   }, [uploadedFiles, fileSearch]);
-
 
   const onDeleteFile = async (file) => {
     if (!window.confirm(t("deleteFileConfirm", { filename: file.filename }))) return;
@@ -177,11 +168,11 @@ export default function AccessPage() {
         if (prevId && !data.some((t) => t.id === prevId)) return data.length ? data[0].id : null;
         return prevId;
     });
-    };
+  };
 
-    useEffect(() => {
+  useEffect(() => {
     refreshThreads("");
-    }, []);
+  }, []);
 
     const handleNewChat = async (e) => {
     e?.preventDefault?.();
@@ -190,47 +181,46 @@ export default function AccessPage() {
 
     setCreatingThread(true);
     try {
-        const t = await createThread(chatMode);
-        setThreads((prev) => [t, ...prev]);
-        setActiveThreadId(t.id);
-        navigate(`/admin?threadId=${t.id}`);
+        const tItem = await createThread(chatMode);
+      setThreads((prev) => [tItem, ...prev]);
+      setActiveThreadId(tItem.id);
+      navigate(`/admin?threadId=${tItem.id}`);
     } finally {
-        setCreatingThread(false);
+      setCreatingThread(false);
     }
-    };
+  };
 
-    const handleSearch = async (value) => {
+  const handleSearch = async (value) => {
     await refreshThreads(value);
-    };
+  };
 
-    const handleRename = async (threadId, title) => {
+  const handleRename = async (threadId, title) => {
     const updated = await renameThread(threadId, title);
     setThreads((prev) => prev.map((t) => (t.id === threadId ? updated : t)));
-    };
+  };
 
-    const handleDeleteThread = async (threadId) => {
+  const handleDeleteThread = async (threadId) => {
     await deleteThread(threadId);
     setThreads((prev) => prev.filter((t) => t.id !== threadId));
     setActiveThreadId((prevId) => (prevId === threadId ? null : prevId));
-    };
-
+  };
 
   return (
     <div className={`app-layout ${sidebarOpen ? "sidebar-open" : ""}`}>
       <Navbar role="admin" toggle={() => setSidebarOpen((v) => !v)} chatMode={chatMode} onChatModeChange={setChatMode} sidebarOpen={sidebarOpen} />
       <div className="content-row">
         <AdminSidebar
-            open={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-            threads={threads}
-            activeThreadId={activeThreadId}
-            onNewChat={handleNewChat}
-            creatingThread={creatingThread}
-            onSearch={handleSearch}
-            onSelectThread={(id) => navigate(`/admin?threadId=${id}`)}
-            onRenameThread={handleRename}
-            onDeleteThread={handleDeleteThread}
-            onUploadFile={uploadDocument}
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          threads={threads}
+          activeThreadId={activeThreadId}
+          onNewChat={handleNewChat}
+          creatingThread={creatingThread}
+          onSearch={handleSearch}
+          onSelectThread={(id) => navigate(`/admin?threadId=${id}`)}
+          onRenameThread={handleRename}
+          onDeleteThread={handleDeleteThread}
+          onUploadFile={uploadDocument}
         />
 
         <main className="admin-page-content">
@@ -242,41 +232,17 @@ export default function AccessPage() {
           <section className="admin-card">
             <h2 className="admin-card-title">{t("addUser")}</h2>
             <form className="admin-form" onSubmit={onCreate}>
-              <input
-                className="admin-input"
-                type="email"
-                placeholder={t("email")}
-                value={form.email}
-                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                required
-              />
-              <input
-                className="admin-input"
-                type="password"
-                placeholder={t("password")}
-                value={form.password}
-                onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                required
-              />
-              <select
-                className="admin-select"
-                value={form.role}
-                onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}
-              >
+              <input className="admin-input" type="email" placeholder={t("email")} value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} required />
+              <input className="admin-input" type="password" placeholder={t("password")} value={form.password} onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))} required />
+              <select className="admin-select" value={form.role} onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}>
                 <option value="member">member</option>
                 <option value="admin">admin</option>
               </select>
               <label className="admin-checkbox">
-                <input
-                  type="checkbox"
-                  checked={form.is_active}
-                  onChange={(e) => setForm((p) => ({ ...p, is_active: e.target.checked }))}
-                />
+                <input type="checkbox" checked={form.is_active} onChange={(e) => setForm((p) => ({ ...p, is_active: e.target.checked }))} />
                 {t("active")}
               </label>
-              <button className="admin-btn primary" disabled={loading}>
-                {loading ? t("creating") : t("add")}
-              </button>
+              <button className="admin-btn primary" disabled={loading}>{loading ? t("creating") : t("add")}</button>
             </form>
           </section>
 
@@ -287,83 +253,63 @@ export default function AccessPage() {
               <h2 className="admin-card-title">{t("usersList")}</h2>
               <label className="admin-search-wrap">
                 <SearchIcon className="icon-16" />
-                <input
-                  className="admin-search-input"
-                  placeholder={t("searchUsers")}
-                  value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                />
+                <input className="admin-search-input" placeholder={t("searchUsers")} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} />
               </label>
             </div>
 
-            <div className="users-layout">
-              <div className="users-cards-grid">
-                {filteredUsers.map((u) => (
-                  <article
-                    key={u.id}
-                    className={`user-card ${selectedUser?.id === u.id ? "selected" : ""}`}
-                    onClick={() => {
-                      setSelectedUserId(u.id);
-                      setUserMenuOpenFor(null);
-                    }}
-                  >
-                    <div className="user-card-head">
-                      <div>
-                        <p className="user-card-email">{u.email}</p>
-                        <p className="user-card-id">ID: {u.id}</p>
-                      </div>
-                      <div className="thread-menu-wrap" ref={userMenuOpenFor === u.id ? userMenuRef : null}>
-                        <button
-                          className="thread-more-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setUserMenuOpenFor((prev) => (prev === u.id ? null : u.id));
-                          }}
-                        >
-                          <MoreIcon className="icon-16" />
-                        </button>
-                        {userMenuOpenFor === u.id && (
-                          <div className="thread-dropdown">
-                            <button onClick={() => { onEdit(u); setUserMenuOpenFor(null); }}>{t("edit")}</button>
-                            <button onClick={() => { onRole(u); setUserMenuOpenFor(null); }}>{t("changeRole")}</button>
-                            <button
-                              className={u.is_active ? "danger" : ""}
-                              onClick={() => {
-                                onToggleAccess(u);
-                                setUserMenuOpenFor(null);
-                              }}
-                            >
-                              {u.is_active ? t("disableAccess") : t("enableAccess")}
-                            </button>
-                            <button className="danger" onClick={() => { onDelete(u); setUserMenuOpenFor(null); }}>{t("delete")}</button>
-                          </div>
-                        )}
-                      </div>
+            <div className="users-list-wrap">
+              {filteredUsers.length === 0 && <p>{t("noUsersFound")}</p>}
+              {filteredUsers.map((u) => {
+                const isExpanded = expandedUserId === u.id;
+                return (
+                  <article key={u.id} className={`user-list-card ${isExpanded ? "expanded" : ""}`}>
+                    <button
+                      className="user-list-summary"
+                      onClick={() => {
+                        setExpandedUserId((prev) => (prev === u.id ? null : u.id));
+                        setUserMenuOpenFor(null);
+                      }}
+                    >
+                      <span className="user-col email">{u.email}</span>
+                      <span className="user-col id">ID: {u.id}</span>
+                      <span className="user-col role"><span className={`role-badge ${u.role}`}>{u.role}</span></span>
+                      <span className="user-col active"><span className={`status-badge ${u.is_active ? "active" : "inactive"}`}>{u.is_active ? t("yes") : t("no")}</span></span>
+                    </button>
+
+                    <div className="user-list-actions" ref={userMenuOpenFor === u.id ? userMenuRef : null}>
+                      <button
+                        className="thread-more-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setUserMenuOpenFor((prev) => (prev === u.id ? null : u.id));
+                        }}
+                      >
+                        <MoreIcon className="icon-16" />
+                      </button>
+                      {userMenuOpenFor === u.id && (
+                        <div className="thread-dropdown">
+                          <button onClick={() => { onEdit(u); setUserMenuOpenFor(null); }}>{t("edit")}</button>
+                          <button onClick={() => { onRole(u); setUserMenuOpenFor(null); }}>{t("changeRole")}</button>
+                          <button className={u.is_active ? "danger" : ""} onClick={() => { onToggleAccess(u); setUserMenuOpenFor(null); }}>
+                            {u.is_active ? t("disableAccess") : t("enableAccess")}
+                          </button>
+                          <button className="danger" onClick={() => { onDelete(u); setUserMenuOpenFor(null); }}>{t("delete")}</button>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="user-card-meta">
-                      <span className={`role-badge ${u.role}`}>{u.role}</span>
-                      <span className={`status-badge ${u.is_active ? "active" : "inactive"}`}>
-                        {u.is_active ? t("yes") : t("no")}
-                      </span>
-                    </div>
+                    {isExpanded && (
+                      <div className="user-list-details">
+                        <h3>{t("userDetails")}</h3>
+                        <p><strong>ID:</strong> {u.id}</p>
+                        <p><strong>{t("email")}:</strong> {u.email}</p>
+                        <p><strong>{t("active")}:</strong> {u.is_active ? t("yes") : t("no")}</p>
+                        <p><strong>Rôle:</strong> {u.role}</p>
+                      </div>
+                    )}
                   </article>
-                ))}
-              </div>
-
-              <aside className="user-detail-panel">
-                {selectedUser ? (
-                  <>
-                    <h3>{t("userDetails")}</h3>
-                    <p><strong>ID:</strong> {selectedUser.id}</p>
-                    <p><strong>{t("email")}:</strong> {selectedUser.email}</p>
-                    <p><strong>{t("active")}:</strong> {selectedUser.is_active ? t("yes") : t("no")}</p>
-                    <p><strong>Rôle:</strong> {selectedUser.role}</p>
-                  </>
-                ) : (
-                  <p>{t("noUsersFound")}</p>
-                )}
-              </aside>
+                );
+              })}
             </div>
           </section>
 
@@ -373,24 +319,13 @@ export default function AccessPage() {
               <div className="admin-files-actions">
                 <label className="admin-search-wrap">
                   <SearchIcon className="icon-16" />
-                  <input
-                    className="admin-search-input"
-                    placeholder={t("searchFiles")}
-                    value={fileSearch}
-                    onChange={(e) => setFileSearch(e.target.value)}
-                  />
+                  <input className="admin-search-input" placeholder={t("searchFiles")} value={fileSearch} onChange={(e) => setFileSearch(e.target.value)} />
                 </label>
-                <select
-                  className="admin-select"
-                  value={fileVisibility}
-                  onChange={(e) => setFileVisibility(e.target.value)}
-                >
+                <select className="admin-select" value={fileVisibility} onChange={(e) => setFileVisibility(e.target.value)}>
                   <option value="private">private</option>
                   <option value="public">public</option>
                 </select>
-                <button className="admin-btn" onClick={() => loadFiles(fileVisibility)} disabled={filesLoading}>
-                  {filesLoading ? t("loading") : t("refresh")}
-                </button>
+                <button className="admin-btn" onClick={() => loadFiles(fileVisibility)} disabled={filesLoading}>{filesLoading ? t("loading") : t("refresh")}</button>
               </div>
             </div>
 
@@ -414,9 +349,7 @@ export default function AccessPage() {
                   {filteredFiles.map((file) => (
                     <tr key={`${file.visibility}-${file.filename}`}>
                       <td>{file.filename}</td>
-                      <td>
-                        <span className={`visibility-badge ${file.visibility}`}>{file.visibility}</span>
-                      </td>
+                      <td><span className={`visibility-badge ${file.visibility}`}>{file.visibility}</span></td>
                       <td>{file.size}</td>
                       <td>{file.updated_at ? new Date(file.updated_at * 1000).toLocaleString(lang) : "-"}</td>
                       <td>

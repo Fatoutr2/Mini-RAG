@@ -9,7 +9,7 @@ import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
 export default function Members() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 900);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
   const navigate = useNavigate();

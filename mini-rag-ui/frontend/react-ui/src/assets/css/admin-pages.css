@@ -282,92 +282,6 @@
   outline: none;
 }
 
-.users-layout {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 14px;
-}
-
-.users-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 10px;
-}
-
-.user-card {
-  border: 1px solid var(--border);
-  background: var(--bg-soft);
-  border-radius: 14px;
-  padding: 12px;
-  cursor: pointer;
-}
-
-.user-card.selected {
-  border-color: rgba(16, 185, 129, 0.45);
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
-}
-
-.user-card-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.user-card-email {
-  margin: 0;
-  font-weight: 700;
-  overflow-wrap: anywhere;
-}
-
-.user-card-id {
-  margin: 5px 0 0;
-  font-size: 12px;
-  color: var(--text-dim);
-}
-
-.user-card-meta {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.status-badge {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-}
-
-.status-badge.active {
-  background: rgba(16, 185, 129, 0.18);
-  border-color: rgba(16, 185, 129, 0.45);
-  color: #34d399;
-}
-
-.status-badge.inactive {
-  background: rgba(244, 63, 94, 0.08);
-  border-color: rgba(244, 63, 94, 0.35);
-  color: #fb7185;
-}
-
-.user-detail-panel {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--bg-soft);
-  padding: 14px;
-}
-
-.user-detail-panel h3 {
-  margin: 0 0 10px;
-}
-
-.user-detail-panel p {
-  margin: 0 0 8px;
-  font-size: 14px;
-}
-
 @media (max-width: 900px) {
   .admin-section-header,
   .admin-files-header {
@@ -382,7 +296,78 @@
     width: 100%;
   }
 
-  .users-layout {
+  .user-list-card {
     grid-template-columns: 1fr;
   }
+
+  .user-list-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+.users-list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.user-list-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-soft);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+}
+
+.user-list-card.expanded {
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.user-list-summary {
+  border: none;
+  background: transparent;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) minmax(80px, 0.8fr) minmax(90px, 0.8fr) minmax(90px, 0.8fr);
+  align-items: center;
+  gap: 10px;
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.user-col.email {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.user-col.id {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.user-list-actions {
+  position: relative;
+}
+
+.user-list-details {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--border);
+  margin: 2px 6px 0;
+  padding: 10px 8px 6px;
+}
+
+.user-list-details h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.user-list-details p {
+  margin: 0 0 6px;
+  font-size: 14px;
 }

@@ -7,7 +7,7 @@ import { uploadDocument } from "../services/uploadService";
 import "../assets/css/layout.css";
 
 export default function MemberPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 900);
   const [threads, setThreads] = useState([]);
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [search, setSearch] = useState("");

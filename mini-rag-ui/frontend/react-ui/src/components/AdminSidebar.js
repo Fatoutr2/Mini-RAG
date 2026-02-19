@@ -132,12 +132,12 @@ export default function AdminSidebar({
 
       <div className="sidebar-bottom">
         <input ref={fileInputRef} type="file" style={{ display: "none" }} onChange={handleFileChange} />
-        <button className="sidebar-btn" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+        <button className="sidebar-btn" onClick={() => { fileInputRef.current?.click(); closeIfMobile(); }} disabled={uploading}>
           <FileIcon className="icon-16" />
           {uploading ? t("uploadProgress") : t("addFile")}
         </button>
 
-        <button className="logout" onClick={logout}><LogOutIcon className="icon-16" />{t("logout")}</button>
+        <button className="logout" onClick={() => { logout(); closeIfMobile(); }}><LogOutIcon className="icon-16" />{t("logout")}</button>
       </div>
     </aside>
   );

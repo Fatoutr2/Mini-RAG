@@ -104,7 +104,7 @@ export default function ConversationSidebar({
       )}
 
       <div className="sidebar-bottom">
-        <button className="logout" onClick={logout}>Déconnexion</button>
+        <button className="logout" onClick={() => { logout(); closeIfMobile(); }}>Déconnexion</button>
       </div>
     </aside>
   );

@@ -15,7 +15,7 @@ import "../assets/css/admin-pages.css";
 
 
 export default function AdminPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 900);
   const [threads, setThreads] = useState([]);
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [searchValue, setSearchValue] = useState("");
