@@ -1,7 +1,8 @@
 .admin-page-content {
   flex: 1;
   padding: 28px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.06), transparent 30%), var(--bg-main);
   color: var(--text-main);
 }
@@ -301,7 +302,12 @@
   }
 
   .user-list-summary {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .user-col {
+    display: block;
   }
 }
 

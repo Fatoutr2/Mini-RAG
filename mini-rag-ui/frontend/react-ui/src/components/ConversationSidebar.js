@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "../auth/AuthContext";
 import "../assets/css/sidebar.css";
 
 export default function ConversationSidebar({
@@ -16,7 +15,6 @@ export default function ConversationSidebar({
   onOpenMembers,
   onOpenAdmins,
 }) {
-  const { logout } = useAuth();
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
   const sidebarRef = useRef(null);
@@ -103,9 +101,6 @@ export default function ConversationSidebar({
         </>
       )}
 
-      <div className="sidebar-bottom">
-        <button className="logout" onClick={() => { logout(); closeIfMobile(); }}>Déconnexion</button>
-      </div>
     </aside>
   );
 }

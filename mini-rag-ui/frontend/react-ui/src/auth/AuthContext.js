@@ -3,19 +3,23 @@ import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
+const getInitialUser = () => {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+  const email = localStorage.getItem("email") || "";
+  return token ? { token, role, email } : null;
+};
+
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(() => {
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
-    return token ? { token, role } : null;
-  });
+  const [user, setUser] = useState(getInitialUser);
 
-  const login = (token, role, refreshToken = "") => {  
+  const login = (token, role, refreshToken = "", email = "") => {
     localStorage.setItem("token", token);
     localStorage.setItem("role", role);
     if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
-    setUser({ token, role });
+    if (email) localStorage.setItem("email", email);
+    setUser({ token, role, email });
 
     if (role === "member") navigate("/member");
     else if (role === "admin") navigate("/admin");
@@ -38,6 +42,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("refresh_token");
+    localStorage.removeItem("email");
     setUser(null);
     navigate("/?login=1");
   };

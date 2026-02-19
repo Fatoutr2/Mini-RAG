@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "../auth/AuthContext";
 import { useI18n } from "../i18n/LanguageContext";
-import { FileIcon, LogOutIcon, MoreIcon, PlusIcon, SearchIcon } from "./Icons";
+import { FileIcon, MoreIcon, PlusIcon, SearchIcon } from "./Icons";
 import "../assets/css/sidebar.css";
 import "../assets/css/layout.css";
 
@@ -18,13 +17,17 @@ export default function MemberSidebar({
   onDeleteThread,
   onUploadFile,
 }) {
-  const { logout } = useAuth();
   const { t } = useI18n();
   const [menuOpenFor, setMenuOpenFor] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [chatsCollapsed, setChatsCollapsed] = useState(false);
   const menuRef = useRef(null);
+  const sidebarRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const closeIfMobile = () => {
+    if (window.innerWidth <= 900) onClose?.();
+  };
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -34,6 +37,7 @@ export default function MemberSidebar({
     try {
       await onUploadFile(file);
       window.alert(`${t("uploadDoneIn")} data/private`);
+      closeIfMobile();
     } catch (err) {
       window.alert(err.message || t("uploadImpossible"));
     } finally {
@@ -44,22 +48,23 @@ export default function MemberSidebar({
 
   useEffect(() => {
     const onDocClick = (e) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target)) setMenuOpenFor(null);
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpenFor(null);
+      if (open && window.innerWidth <= 900 && sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+        onClose?.();
+      }
     };
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
-  }, []);
+  }, [open, onClose]);
 
   return (
-    <aside className={`sidebar ${open ? "open" : ""}`}>
-
+    <aside ref={sidebarRef} className={`sidebar ${open ? "open" : ""}`}>
       <div className="sidebar-logo">(•‿•) SmartIA</div>
 
       <div className="sidebar-top">
-        <button className="sidebar-btn primary" onClick={onNewChat} disabled={creatingThread}>
+        <button className="sidebar-btn primary" onClick={(e) => { onNewChat(e); closeIfMobile(); }} disabled={creatingThread}>
           <PlusIcon className="icon-16" />
-           {creatingThread ? t("creating") : t("newChat")}
+          {creatingThread ? t("creating") : t("newChat")}
         </button>
 
         <label className="sidebar-search-wrap">
@@ -77,7 +82,7 @@ export default function MemberSidebar({
         <div className="sidebar-list custom-scrollbar">
           {threads.map((tItem) => (
             <div key={tItem.id} className={`thread-row ${activeThreadId === tItem.id ? "active" : ""}`}>
-              <button className="thread-title-btn" onClick={() => onSelectThread(tItem.id)}>{tItem.title}</button>
+              <button className="thread-title-btn" onClick={() => { onSelectThread(tItem.id); closeIfMobile(); }}>{tItem.title}</button>
 
               <div className="thread-menu-wrap" ref={menuOpenFor === tItem.id ? menuRef : null}>
                 <button className="thread-more-btn" onClick={(e) => {
@@ -111,11 +116,6 @@ export default function MemberSidebar({
         <button className="sidebar-btn" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
           <FileIcon className="icon-16" />
           {uploading ? t("uploadProgress") : t("addFile")}
-        </button>
-
-        <button className="logout" onClick={logout}>
-          <LogOutIcon className="icon-16" />
-          {t("logout")}
         </button>
       </div>
     </aside>

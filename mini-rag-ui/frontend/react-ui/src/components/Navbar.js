@@ -1,17 +1,39 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MoonIcon, SunIcon } from "./Icons";
 import { useI18n } from "../i18n/LanguageContext";
+import { useAuth } from "../auth/AuthContext";
 import "../assets/css/navbar.css";
 
-export default function Navbar({ toggle, role = "member", chatMode, onChatModeChange, sidebarOpen = true }) {
+export default function Navbar({ toggle = () => {}, role = "member", chatMode, onChatModeChange, sidebarOpen = true }) {
   const showModeSwitch = typeof onChatModeChange === "function";
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
   const { lang, setLang, t } = useI18n();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const initials = useMemo(() => {
+    const source = user?.email || role || "U";
+    const parts = source.split("@")[0].split(/[._\-\s]+/).filter(Boolean);
+    if (!parts.length) return "U";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0] || ""}${parts[1][0] || ""}`.toUpperCase();
+  }, [user, role]);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
 
   return (
     <header className={`navbar ${sidebarOpen ? "with-sidebar" : ""}`}>
@@ -57,7 +79,38 @@ export default function Navbar({ toggle, role = "member", chatMode, onChatModeCh
         >
           {theme === "dark" ? <SunIcon className="w-5" /> : <MoonIcon className="w-5" />}
         </button>
-        <span className="role-badge">{role === "admin" ? t("roleAdmin") : t("roleMember")}</span>
+        
+        <div className="profile-wrap" ref={profileRef}>
+          <button className="avatar-btn" onClick={() => setProfileOpen((v) => !v)} type="button" aria-label={t("profileMenu")}>
+            {initials}
+          </button>
+
+          {profileOpen && (
+            <div className="profile-dropdown">
+              <div className="profile-email">{user?.email || t("profile")}</div>
+              <button
+                type="button"
+                onClick={() => {
+                  navigate("/profile");
+                  setProfileOpen(false);
+                }}
+              >
+                {t("settings")}
+              </button>
+              <div className="profile-divider" />
+              <button
+                type="button"
+                className="danger"
+                onClick={() => {
+                  logout();
+                  setProfileOpen(false);
+                }}
+              >
+                {t("logout")}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

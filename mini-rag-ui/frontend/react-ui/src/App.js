@@ -117,6 +117,7 @@ import Index from "./pages/Index";
 import AccessPage from "./pages/AccessPage";
 import Members from "./pages/Members";
 import Admins from "./pages/Admins";
+import ProfilePage from "./pages/ProfilePage";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminRoute from "./routes/AdminRoute";
@@ -168,6 +169,15 @@ function App() {
           <AdminRoute>
             <Admins />
           </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
         }
       />
 

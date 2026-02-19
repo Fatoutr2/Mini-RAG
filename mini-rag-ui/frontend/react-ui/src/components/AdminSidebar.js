@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
 import { useI18n } from "../i18n/LanguageContext";
-import { FileIcon, KeyIcon, LogOutIcon, MoreIcon, PlusIcon, SearchIcon, ShieldIcon, UsersIcon } from "./Icons";
+import { FileIcon, KeyIcon, MoreIcon, PlusIcon, SearchIcon, ShieldIcon, UsersIcon } from "./Icons";
 import "../assets/css/sidebar.css";
 import "../assets/css/layout.css";
 
@@ -19,7 +18,6 @@ export default function AdminSidebar({
   onDeleteThread,
   onUploadFile,
 }) {
-  const { logout } = useAuth();
   const { t } = useI18n();
   const [menuOpenFor, setMenuOpenFor] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -137,7 +135,6 @@ export default function AdminSidebar({
           {uploading ? t("uploadProgress") : t("addFile")}
         </button>
 
-        <button className="logout" onClick={() => { logout(); closeIfMobile(); }}><LogOutIcon className="icon-16" />{t("logout")}</button>
       </div>
     </aside>
   );
