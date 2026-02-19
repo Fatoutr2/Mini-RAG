@@ -25,6 +25,7 @@ export default function AdminSidebar({
   const [uploading, setUploading] = useState(false);
   const [chatsCollapsed, setChatsCollapsed] = useState(false);
   const menuRef = useRef(null);
+  const sidebarRef = useRef(null);
   const fileInputRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -33,12 +34,18 @@ export default function AdminSidebar({
 
   useEffect(() => {
     const onDocClick = (e) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target)) setMenuOpenFor(null);
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpenFor(null);
+      if (open && window.innerWidth <= 900 && sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+        onClose?.();
+      }
     };
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
-  }, []);
+  }, [open, onClose]);
+
+  const closeIfMobile = () => {
+    if (window.innerWidth <= 900) onClose?.();
+  };
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -65,12 +72,12 @@ export default function AdminSidebar({
   };
 
   return (
-    <aside className={`sidebar ${open ? "open" : ""}`}>
+    <aside ref={sidebarRef} className={`sidebar ${open ? "open" : ""}`}>
 
       <div className="sidebar-logo">(•‿•) SmartIA</div>
 
       <div className="sidebar-top">
-        <button className="sidebar-btn primary" onClick={onNewChat} disabled={creatingThread}>
+        <button className="sidebar-btn primary" onClick={(e) => { onNewChat(e); closeIfMobile(); }} disabled={creatingThread}>
           <PlusIcon className="icon-16" />
           {creatingThread ? t("creating") : t("newChat")}
         </button>
@@ -90,7 +97,7 @@ export default function AdminSidebar({
         <div className="sidebar-list custom-scrollbar">
           {threads.map((tItem) => (
             <div key={tItem.id} className={`thread-row ${activeThreadId === tItem.id ? "active" : ""}`}>
-              <button className="thread-title-btn" onClick={() => onSelectThread(tItem.id)}>{tItem.title}</button>
+              <button className="thread-title-btn" onClick={() => { onSelectThread(tItem.id); closeIfMobile(); }}>{tItem.title}</button>
               <div className="thread-menu-wrap" ref={menuOpenFor === tItem.id ? menuRef : null}>
                 <button className="thread-more-btn" onClick={(e) => {
                   e.stopPropagation();
@@ -118,9 +125,9 @@ export default function AdminSidebar({
         )}
 
       <ul className="admin-menu">
-        <li><button className={`admin-link ${isActive("/admin/access") ? "active" : ""}`} onClick={() => navigate("/admin/access")}><KeyIcon className="icon-16" />{t("adminAccess")}</button></li>
-        <li><button className={`admin-link ${isActive("/admin/members") ? "active" : ""}`} onClick={() => navigate("/admin/members")}><UsersIcon className="icon-16" />{t("adminMembers")}</button></li>
-        <li><button className={`admin-link ${isActive("/admin/admins") ? "active" : ""}`} onClick={() => navigate("/admin/admins")}><ShieldIcon className="icon-16" />{t("adminAdmins")}</button></li>
+        <li><button className={`admin-link ${isActive("/admin/access") ? "active" : ""}`} onClick={() => { navigate("/admin/access"); closeIfMobile(); }}><KeyIcon className="icon-16" />{t("adminAccess")}</button></li>
+        <li><button className={`admin-link ${isActive("/admin/members") ? "active" : ""}`} onClick={() => { navigate("/admin/members"); closeIfMobile(); }}><UsersIcon className="icon-16" />{t("adminMembers")}</button></li>
+        <li><button className={`admin-link ${isActive("/admin/admins") ? "active" : ""}`} onClick={() => { navigate("/admin/admins"); closeIfMobile(); }}><ShieldIcon className="icon-16" />{t("adminAdmins")}</button></li>
       </ul>
 
       <div className="sidebar-bottom">

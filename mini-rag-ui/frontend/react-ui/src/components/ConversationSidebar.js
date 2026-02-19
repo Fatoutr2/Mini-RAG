@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import "../assets/css/sidebar.css";
 
@@ -19,6 +19,7 @@ export default function ConversationSidebar({
   const { logout } = useAuth();
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const sidebarRef = useRef(null);
 
   const startEdit = (thread) => {
     setEditingId(thread.id);
@@ -33,15 +34,29 @@ export default function ConversationSidebar({
     setEditValue("");
   };
 
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (open && window.innerWidth <= 900 && sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+        onClose?.();
+      }
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [open, onClose]);
+
+  const closeIfMobile = () => {
+    if (window.innerWidth <= 900) onClose?.();
+  };
+
   return (
-    <aside className={`sidebar ${open ? "open" : ""}`}>
+    <aside ref={sidebarRef} className={`sidebar ${open ? "open" : ""}`}>
       <div className="sidebar-header">
         <span>(•‿•)</span>
         <button className="close-btn" onClick={onClose}>✕</button>
       </div>
 
       <div className="sidebar-top">
-        <button className="sidebar-btn" onClick={onNewChat}>✍️ Nouveau chat</button>
+        <button className="sidebar-btn" onClick={(e) => { onNewChat(e); closeIfMobile(); }}>✍️ Nouveau chat</button>
         <input
           className="sidebar-search"
           placeholder="🔍 Rechercher chat"
@@ -67,7 +82,7 @@ export default function ConversationSidebar({
               />
             ) : (
               <>
-                <button className="thread-title-btn" onClick={() => onSelectThread(t.id)}>
+                <button className="thread-title-btn" onClick={() => { onSelectThread(t.id); closeIfMobile(); }}>
                   {t.title}
                 </button>
                 <button className="thread-edit-btn" onClick={() => startEdit(t)}>✏️</button>
@@ -81,9 +96,9 @@ export default function ConversationSidebar({
         <>
           <div className="sidebar-section-title">Administration</div>
           <ul className="admin-menu">
-            <li><button onClick={onOpenAccess}>🔑 Accès</button></li>
-            <li><button onClick={onOpenMembers}>👤 Membres</button></li>
-            <li><button onClick={onOpenAdmins}>🛡 Admins</button></li>
+            <li><button onClick={() => { onOpenAccess?.(); closeIfMobile(); }}>🔑 Accès</button></li>
+            <li><button onClick={() => { onOpenMembers?.(); closeIfMobile(); }}>👤 Membres</button></li>
+            <li><button onClick={() => { onOpenAdmins?.(); closeIfMobile(); }}>🛡 Admins</button></li>
           </ul>
         </>
       )}
