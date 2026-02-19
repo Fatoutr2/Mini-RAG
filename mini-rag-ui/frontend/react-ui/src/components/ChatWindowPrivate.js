@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FileIcon, SendIcon } from "./Icons";
+import { useI18n } from "../i18n/LanguageContext";
 import "../assets/css/chat.css";
 import { getMessages, sendMessageChat, sendMessageRag } from "../services/chatService";
 import { uploadDocument } from "../services/uploadService";
@@ -11,6 +12,7 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
   const [uploadingFile, setUploadingFile] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [error, setError] = useState("");
+  const { t } = useI18n();
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -31,11 +33,11 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
         const data = await getMessages(activeThreadId);
         setMessages(data.map((m) => ({ role: m.role, content: m.content })));
       } catch (err) {
-        setError(err.message || "Impossible de charger les messages");
-      }
+        setError(err.message || t("loadMessagesError"));
+        }
     };
     load();
-  }, [activeThreadId]);
+  }, [activeThreadId, t]);
 
   const handleFilePick = async (e) => {
     const file = e.target.files?.[0];
@@ -52,7 +54,7 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
         return [...prev, uploadedName];
       });
     } catch (err) {
-      setError(err.message || "Upload fichier impossible");
+      setError(err.message || t("uploadFileError"));
     } finally {
       setUploadingFile(false);
       e.target.value = "";
@@ -64,7 +66,7 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
     if (!text || loading || !activeThreadId) return;
 
     const filesForRequest = [...selectedFiles];
-    const fileNote = filesForRequest.length ? `\n\n📎 Fichiers joints: ${filesForRequest.join(", ")}` : "";
+    const fileNote = filesForRequest.length ? `\n\n📎 ${t("attachedFiles")}: ${filesForRequest.join(", ")}` : "";
 
     setMessages((prev) => [...prev, { role: "user", content: `${text}${fileNote}` }]);
     setQuestion("");
@@ -80,7 +82,7 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
       setSelectedFiles([]);
       if (onThreadAutoTitleRefresh) onThreadAutoTitleRefresh();
     } catch (err) {
-      setError(err.message || "Erreur serveur");
+      setError(err.message || t("serverError"));
     } finally {
       setLoading(false);
     }
@@ -101,11 +103,15 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
         {emptyState ? (
           <div className="chat-empty-state">
             <div className="spark-box">✨</div>
-            <h2>Comment puis-je vous aider aujourd'hui ?</h2>
-            <p>Posez des questions sur vos documents ou discutez librement avec SmartIA.</p>
+            <h2>{t("askHelpTitle")}</h2>
+            <p>{t("askHelpSubtitle")}</p>
             <div className="suggestion-grid">
-              <button className="suggestion-card" onClick={() => setQuestion("Peux-tu m'aider à analyser un document ?")}>📑<strong>Analyser un document</strong><span>Chargez un PDF puis posez des questions ciblées.</span></button>
-              <button className="suggestion-card" onClick={() => setQuestion("Donne-moi le fichier complet contrat-prestataire.pdf")}>📂<strong>Donner un fichier complet</strong><span>Demandez « donne-moi le fichier complet NOM_FICHIER ».</span></button>
+              <button className="suggestion-card" onClick={() => setQuestion("Peux-tu m'aider à analyser un document ?")}>
+                📑<strong>{t("analyzeDoc")}</strong><span>{t("analyzeDocHint")}</span>
+              </button>
+              <button className="suggestion-card" onClick={() => setQuestion("Donne-moi le fichier complet contrat-prestataire.pdf")}>
+                📂<strong>{t("fullFile")}</strong><span>{t("fullFileHint")}</span>
+              </button>
             </div>
           </div>
         ) : (
@@ -148,7 +154,7 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
         <button
           className="attach-btn"
           type="button"
-          aria-label="Ajouter un fichier"
+          aria-label={t("addFileAria")}
           onClick={() => fileInputRef.current?.click()}
           disabled={uploadingFile || !activeThreadId}
         >
@@ -156,7 +162,7 @@ function ChatWindowPrivate({ sidebarOpen, activeThreadId, onThreadAutoTitleRefre
         </button>
         <textarea
           rows={1}
-          placeholder={activeThreadId ? "Envoyer un message..." : "Créez un nouveau chat d'abord..."}
+          placeholder={activeThreadId ? t("sendMessage") : t("createChatFirst")}
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={onKeyDown}

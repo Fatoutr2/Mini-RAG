@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { useI18n } from "../i18n/LanguageContext";
 import { FileIcon, KeyIcon, LogOutIcon, MoreIcon, PlusIcon, SearchIcon, ShieldIcon, UsersIcon } from "./Icons";
 import "../assets/css/sidebar.css";
 import "../assets/css/layout.css";
@@ -19,6 +20,7 @@ export default function AdminSidebar({
   onUploadFile,
 }) {
   const { logout } = useAuth();
+  const { t } = useI18n();
   const [menuOpenFor, setMenuOpenFor] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [chatsCollapsed, setChatsCollapsed] = useState(false);
@@ -42,10 +44,10 @@ export default function AdminSidebar({
     const file = e.target.files?.[0];
     if (!file || !onUploadFile) return;
 
-    const visibility = window.prompt("Destination ? Tapez public ou private", "private")?.trim().toLowerCase() || "private";
+    const visibility = window.prompt(t("destinationPrompt"), "private")?.trim().toLowerCase() || "private";
 
     if (!["public", "private"].includes(visibility)) {
-      window.alert("Destination invalide. Utilisez public ou private.");
+      window.alert(t("destinationInvalid"));
       e.target.value = "";
       return;
     }
@@ -53,9 +55,9 @@ export default function AdminSidebar({
     setUploading(true);
     try {
       await onUploadFile(file, visibility);
-      window.alert(`Fichier déposé dans data/${visibility}`);
+      window.alert(`${t("uploadDoneIn")} data/${visibility}`);
     } catch (err) {
-      window.alert(err.message || "Upload impossible");
+      window.alert(err.message || t("uploadImpossible"));
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -64,53 +66,49 @@ export default function AdminSidebar({
 
   return (
     <aside className={`sidebar ${open ? "open" : ""}`}>
-      <div className="sidebar-header">
-        <span>(•‿•)</span>
-        <button className="close-btn" onClick={onClose}>✕</button>
-      </div>
 
       <div className="sidebar-logo">(•‿•) SmartIA</div>
 
       <div className="sidebar-top">
         <button className="sidebar-btn primary" onClick={onNewChat} disabled={creatingThread}>
           <PlusIcon className="icon-16" />
-          {creatingThread ? "Création..." : "Nouveau chat"}
+          {creatingThread ? t("creating") : t("newChat")}
         </button>
 
         <label className="sidebar-search-wrap">
           <SearchIcon className="icon-16" />
-          <input className="sidebar-search" placeholder="Rechercher chat" onChange={(e) => onSearch(e.target.value)} />
+          <input className="sidebar-search" placeholder={t("searchChat")} onChange={(e) => onSearch(e.target.value)} />
         </label>
       </div>
 
       <button className="sidebar-section-toggle" onClick={() => setChatsCollapsed((v) => !v)} aria-expanded={!chatsCollapsed}>
-        <span>VOS CHATS</span>
+        <span>{t("yourChats")}</span>
         <span className={`chevron ${chatsCollapsed ? "collapsed" : ""}`}>▾</span>
       </button>
 
       {!chatsCollapsed && (
         <div className="sidebar-list custom-scrollbar">
-          {threads.map((t) => (
-            <div key={t.id} className={`thread-row ${activeThreadId === t.id ? "active" : ""}`}>
-              <button className="thread-title-btn" onClick={() => onSelectThread(t.id)}>{t.title}</button>
-              <div className="thread-menu-wrap" ref={menuOpenFor === t.id ? menuRef : null}>
+          {threads.map((tItem) => (
+            <div key={tItem.id} className={`thread-row ${activeThreadId === tItem.id ? "active" : ""}`}>
+              <button className="thread-title-btn" onClick={() => onSelectThread(tItem.id)}>{tItem.title}</button>
+              <div className="thread-menu-wrap" ref={menuOpenFor === tItem.id ? menuRef : null}>
                 <button className="thread-more-btn" onClick={(e) => {
                   e.stopPropagation();
-                  setMenuOpenFor((prev) => (prev === t.id ? null : t.id));
+                  setMenuOpenFor((prev) => (prev === tItem.id ? null : tItem.id));
                 }}>
                   <MoreIcon className="icon-16" />
                 </button>
-                {menuOpenFor === t.id && (
+                {menuOpenFor === tItem.id && (
                   <div className="thread-dropdown">
                     <button onClick={() => {
-                      const next = prompt("Nouveau titre", t.title);
-                      if (next && next.trim()) onRenameThread(t.id, next.trim());
+                      const next = prompt(t("newTitlePrompt"), tItem.title);
+                      if (next && next.trim()) onRenameThread(tItem.id, next.trim());
                       setMenuOpenFor(null);
-                    }}>Renommer</button>
+                    }}>{t("rename")}</button>
                     <button className="danger" onClick={() => {
-                      if (window.confirm("Supprimer ce chat ?")) onDeleteThread(t.id);
+                      if (window.confirm(t("deleteChatConfirm"))) onDeleteThread(tItem.id);
                       setMenuOpenFor(null);
-                    }}>Supprimer</button>
+                    }}>{t("delete")}</button>
                   </div>
                 )}
               </div>
@@ -120,19 +118,19 @@ export default function AdminSidebar({
         )}
 
       <ul className="admin-menu">
-        <li><button className={`admin-link ${isActive("/admin/access") ? "active" : ""}`} onClick={() => navigate("/admin/access")}><KeyIcon className="icon-16" />Accès</button></li>
-        <li><button className={`admin-link ${isActive("/admin/members") ? "active" : ""}`} onClick={() => navigate("/admin/members")}><UsersIcon className="icon-16" />Membres</button></li>
-        <li><button className={`admin-link ${isActive("/admin/admins") ? "active" : ""}`} onClick={() => navigate("/admin/admins")}><ShieldIcon className="icon-16" />Admins</button></li>
+        <li><button className={`admin-link ${isActive("/admin/access") ? "active" : ""}`} onClick={() => navigate("/admin/access")}><KeyIcon className="icon-16" />{t("adminAccess")}</button></li>
+        <li><button className={`admin-link ${isActive("/admin/members") ? "active" : ""}`} onClick={() => navigate("/admin/members")}><UsersIcon className="icon-16" />{t("adminMembers")}</button></li>
+        <li><button className={`admin-link ${isActive("/admin/admins") ? "active" : ""}`} onClick={() => navigate("/admin/admins")}><ShieldIcon className="icon-16" />{t("adminAdmins")}</button></li>
       </ul>
 
       <div className="sidebar-bottom">
         <input ref={fileInputRef} type="file" style={{ display: "none" }} onChange={handleFileChange} />
         <button className="sidebar-btn" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
           <FileIcon className="icon-16" />
-          {uploading ? "Upload..." : "Ajouter fichier"}
+          {uploading ? t("uploadProgress") : t("addFile")}
         </button>
 
-        <button className="logout" onClick={logout}><LogOutIcon className="icon-16" />Déconnexion</button>
+        <button className="logout" onClick={logout}><LogOutIcon className="icon-16" />{t("logout")}</button>
       </div>
     </aside>
   );

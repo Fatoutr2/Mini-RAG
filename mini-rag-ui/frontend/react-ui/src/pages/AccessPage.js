@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { useI18n } from "../i18n/LanguageContext";
 import AdminSidebar from "../components/AdminSidebar";
 import { createUser, deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
 import { listThreads, createThread, renameThread, deleteThread, setThreadMode } from "../services/chatService";
@@ -11,6 +12,7 @@ import "../assets/css/admin-pages.css";
 
 export default function AccessPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { t, lang } = useI18n();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -71,29 +73,29 @@ export default function AccessPage() {
   };
 
   const onEdit = async (u) => {
-    const email = prompt("Nouvel email", u.email);
+    const email = prompt(t("emailPrompt"), u.email);
     if (!email) return;
     await updateUser(u.id, { email: email.trim() });
     await loadUsers();
   };
 
   const onRole = async (u) => {
-    const role = prompt("Nouveau rôle: member/admin/visitor", u.role);
+    const role = prompt(t("rolePrompt"), u.role);
     if (!role) return;
     await updateUserRole(u.id, role.trim());
     await loadUsers();
   };
 
   const onDelete = async (u) => {
-    if (!window.confirm(`Supprimer ${u.email} ?`)) return;
+    if (!window.confirm(t("deleteUserConfirm", { email: u.email }))) return;
     await deleteUser(u.id);
     await loadUsers();
   };
 
   const onToggleAccess = async (u) => {
     const nextState = !u.is_active;
-    const actionLabel = nextState ? "activer" : "désactiver";
-    if (!window.confirm(`Voulez-vous ${actionLabel} l'accès de ${u.email} ?`)) return;
+    const actionLabel = nextState ? t("enableAccess") : t("disableAccess");
+    if (!window.confirm(t("accessConfirm", { action: actionLabel.toLowerCase(), email: u.email }))) return;
 
     try {
       setError("");
@@ -106,7 +108,7 @@ export default function AccessPage() {
 
 
   const onDeleteFile = async (file) => {
-    if (!window.confirm(`Supprimer le fichier ${file.filename} ?`)) return;
+    if (!window.confirm(t("deleteFileConfirm", { filename: file.filename }))) return;
 
     try {
       setError("");
@@ -118,7 +120,7 @@ export default function AccessPage() {
   };
 
   const onRenameFile = async (file) => {
-    const nextName = prompt("Nouveau nom du fichier", file.filename);
+    const nextName = prompt(t("renameFilePrompt"), file.filename);
     if (!nextName) return;
 
     try {
@@ -197,17 +199,17 @@ export default function AccessPage() {
 
         <main className="admin-page-content">
           <div className="admin-page-header">
-            <h1 className="admin-page-title">🔑 Accès</h1>
-            <p className="admin-page-subtitle">Créer des utilisateurs et gérer tous les accès.</p>
+            <h1 className="admin-page-title">{t("accessTitle")}</h1>
+            <p className="admin-page-subtitle">{t("accessSubtitle")}</p>
           </div>
 
           <section className="admin-card">
-            <h2 className="admin-card-title">Ajouter un utilisateur</h2>
+            <h2 className="admin-card-title">{t("addUser")}</h2>
             <form className="admin-form" onSubmit={onCreate}>
               <input
                 className="admin-input"
                 type="email"
-                placeholder="Email"
+                placeholder={t("email")}
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                 required
@@ -215,7 +217,7 @@ export default function AccessPage() {
               <input
                 className="admin-input"
                 type="password"
-                placeholder="Mot de passe"
+                placeholder={t("password")}
                 value={form.password}
                 onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                 required
@@ -234,10 +236,10 @@ export default function AccessPage() {
                   checked={form.is_active}
                   onChange={(e) => setForm((p) => ({ ...p, is_active: e.target.checked }))}
                 />
-                Actif
+                {t("active")}
               </label>
               <button className="admin-btn primary" disabled={loading}>
-                {loading ? "Création..." : "Ajouter"}
+                {loading ? t("creating") : t("add")}
               </button>
             </form>
           </section>
@@ -245,16 +247,16 @@ export default function AccessPage() {
           {error && <p className="admin-error">{error}</p>}
 
           <section className="admin-card">
-            <h2 className="admin-card-title">Tous les utilisateurs</h2>
+            <h2 className="admin-card-title">{t("usersList")}</h2>
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Email</th>
+                    <th>{t("email")}</th>
                     <th>Rôle</th>
-                    <th>Actif</th>
-                    <th>Actions</th>
+                    <th>{t("active")}</th>
+                    <th>{t("actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -265,18 +267,18 @@ export default function AccessPage() {
                       <td>
                         <span className={`role-badge ${u.role}`}>{u.role}</span>
                       </td>
-                      <td>{u.is_active ? "Oui" : "Non"}</td>
+                      <td>{u.is_active ? t("yes") : t("no")}</td>
                       <td>
                         <div className="admin-actions">
-                          <button className="admin-btn" onClick={() => onEdit(u)}>Modifier</button>
-                          <button className="admin-btn" onClick={() => onRole(u)}>Changer rôle</button>
+                          <button className="admin-btn" onClick={() => onEdit(u)}>{t("edit")}</button>
+                          <button className="admin-btn" onClick={() => onRole(u)}>{t("changeRole")}</button>
                           <button
                             className={`admin-btn ${u.is_active ? "danger" : "primary"}`}
                             onClick={() => onToggleAccess(u)}
                           >
-                            {u.is_active ? "Désactiver accès" : "Activer accès"}
+                            {u.is_active ? t("disableAccess") : t("enableAccess")}
                           </button>
-                          <button className="admin-btn danger" onClick={() => onDelete(u)}>Supprimer</button>
+                          <button className="admin-btn danger" onClick={() => onDelete(u)}>{t("delete")}</button>
                         </div>
                       </td>
                     </tr>
@@ -288,7 +290,7 @@ export default function AccessPage() {
 
           <section className="admin-card">
             <div className="admin-files-header">
-              <h2 className="admin-card-title">Gestion des fichiers</h2>
+              <h2 className="admin-card-title">{t("filesManagement")}</h2>
               <div className="admin-files-actions">
                 <select
                   className="admin-select"
@@ -299,7 +301,7 @@ export default function AccessPage() {
                   <option value="public">public</option>
                 </select>
                 <button className="admin-btn" onClick={() => loadFiles(fileVisibility)} disabled={filesLoading}>
-                  {filesLoading ? "Chargement..." : "Actualiser"}
+                  {filesLoading ? t("loading") : t("refresh")}
                 </button>
               </div>
             </div>
@@ -308,17 +310,17 @@ export default function AccessPage() {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>Fichier</th>
-                    <th>Visibilité</th>
-                    <th>Taille (bytes)</th>
-                    <th>Mis à jour</th>
-                    <th>Actions</th>
+                    <th>{t("file")}</th>
+                    <th>{t("visibility")}</th>
+                    <th>{t("sizeBytes")}</th>
+                    <th>{t("updatedAt")}</th>
+                    <th>{t("actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {!filesLoading && uploadedFiles.length === 0 && (
                     <tr>
-                      <td colSpan={5}>Aucun fichier trouvé.</td>
+                      <td colSpan={5}>{t("noFilesFound")}</td>
                     </tr>
                   )}
                   {uploadedFiles.map((file) => (
@@ -328,11 +330,11 @@ export default function AccessPage() {
                         <span className={`visibility-badge ${file.visibility}`}>{file.visibility}</span>
                       </td>
                       <td>{file.size}</td>
-                      <td>{file.updated_at ? new Date(file.updated_at * 1000).toLocaleString() : "-"}</td>
+                      <td>{file.updated_at ? new Date(file.updated_at * 1000).toLocaleString(lang) : "-"}</td>
                       <td>
                         <div className="admin-actions">
-                          <button className="admin-btn" onClick={() => onRenameFile(file)}>Renommer</button>
-                          <button className="admin-btn danger" onClick={() => onDeleteFile(file)}>Supprimer</button>
+                          <button className="admin-btn" onClick={() => onRenameFile(file)}>{t("rename")}</button>
+                          <button className="admin-btn danger" onClick={() => onDeleteFile(file)}>{t("delete")}</button>
                         </div>
                       </td>
                     </tr>
