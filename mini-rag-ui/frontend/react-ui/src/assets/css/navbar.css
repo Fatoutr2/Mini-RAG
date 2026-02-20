@@ -130,6 +130,13 @@
   z-index: 1300;
 }
 
+.profile-account-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 2px 6px 2px;
+}
+
 .profile-email {
   font-size: 12px;
   color: var(--text-dim);
@@ -137,7 +144,7 @@
   overflow-wrap: anywhere;
 }
 
-.profile-dropdown button {
+ .profile-dropdown button {
   width: 100%;
   border: none;
   background: transparent;
@@ -146,6 +153,9 @@
   padding: 9px 8px;
   border-radius: 8px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .profile-dropdown button:hover { background: var(--bg-soft); }

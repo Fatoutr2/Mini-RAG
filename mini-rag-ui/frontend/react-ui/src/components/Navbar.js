@@ -86,7 +86,8 @@ export default function Navbar({ toggle = () => {}, role = "member", chatMode, o
 
           {profileOpen && (
             <div className="profile-dropdown">
-              <div className="profile-email">{user?.email || t("profile")}</div>
+              <div className="profile-account-title">{t("myAccount")}</div>
+              <div className="profile-divider" />
               <button
                 type="button"
                 onClick={() => {
@@ -94,9 +95,9 @@ export default function Navbar({ toggle = () => {}, role = "member", chatMode, o
                   setProfileOpen(false);
                 }}
               >
-                {t("settings")}
+                <span>⚙</span>{t("settings")}
               </button>
-              <div className="profile-divider" />
+
               <button
                 type="button"
                 className="danger"
@@ -105,7 +106,7 @@ export default function Navbar({ toggle = () => {}, role = "member", chatMode, o
                   setProfileOpen(false);
                 }}
               >
-                {t("logout")}
+                <span>↪</span>{t("logout")}
               </button>
             </div>
           )}

@@ -65,7 +65,7 @@ export default function ConversationSidebar({
       <div className="sidebar-section-title">Vos chats</div>
       <div className="sidebar-list">
         {threads.map((t) => (
-          <div key={t.id} className={`thread-item ${activeThreadId === t.id ? "active" : ""}`}>
+          <div key={t.id} className={`thread-row ${activeThreadId === t.id ? "active" : ""}`}>
             {editingId === t.id ? (
               <input
                 className="thread-rename-input"
@@ -83,7 +83,7 @@ export default function ConversationSidebar({
                 <button className="thread-title-btn" onClick={() => { onSelectThread(t.id); closeIfMobile(); }}>
                   {t.title}
                 </button>
-                <button className="thread-edit-btn" onClick={() => startEdit(t)}>✏️</button>
+                <button className="thread-more-btn" onClick={() => startEdit(t)}>✏️</button>
               </>
             )}
           </div>

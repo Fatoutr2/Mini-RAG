@@ -1,19 +1,18 @@
 import { useState, useEffect } from "react";
+import { useI18n } from "../i18n/LanguageContext";
 import "../assets/css/Index.css";
+
 function ChatWindow({ visitor = false }) {
+  const { t, lang } = useI18n();
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Salut 👋🏻! Comment puis-je vous aider 🙂 ?" }
+    { role: "assistant", content: t("visitorGreeting") }
   ]);
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 🔹 Endpoint selon le mode
-  const endpoint = visitor
-    ? "http://127.0.0.1:8000/rag/visitor"
-    : "http://127.0.0.1:8000/query";
+  const endpoint = visitor ? "http://127.0.0.1:8000/rag/visitor" : "http://127.0.0.1:8000/query";
 
-  // 🔹 Headers selon le mode
   const headers = visitor
     ? { "Content-Type": "application/json" }
     : {
@@ -21,7 +20,6 @@ function ChatWindow({ visitor = false }) {
         Authorization: `Bearer ${localStorage.getItem("token")}`
       };
 
-  // 🔹 Charger historique UNIQUEMENT pour member/admin
   useEffect(() => {
     if (visitor) return;
 
@@ -31,9 +29,9 @@ function ChatWindow({ visitor = false }) {
     fetch("http://127.0.0.1:8000/conversations/me", {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
-      .then(data => {
-        const formatted = data.map(c => ({
+      .then((res) => res.json())
+      .then((data) => {
+        const formatted = data.map((c) => ({
           role: "assistant",
           content: `Q: ${c.question}\nA: ${c.answer}`
         }));
@@ -42,18 +40,25 @@ function ChatWindow({ visitor = false }) {
       .catch(() => {});
   }, [visitor]);
 
-  // 🔹 Envoyer question
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0]?.role === "assistant") {
+        return [{ role: "assistant", content: t("visitorGreeting") }];
+      }
+      return prev;
+    });
+  }, [lang, t]);
+
   const askRAG = async () => {
     if (!question.trim()) return;
 
-    // ❌ Connexion requise SEULEMENT hors visitor
     if (!visitor && !localStorage.getItem("token")) {
-      setError("Veuillez vous connecter pour poser une question.");
+      setError(t("visitorConnectRequired"));
       return;
     }
 
     const userMessage = { role: "user", content: question };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
 
     setLoading(true);
     setError("");
@@ -66,24 +71,19 @@ function ChatWindow({ visitor = false }) {
         body: JSON.stringify({ question })
       });
 
-      if (!res.ok) throw new Error("Erreur serveur");
+      if (!res.ok) throw new Error(t("serverError"));
 
       const data = await res.json();
 
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         ...(data.answer
           ? [{
               role: "assistant",
-              content: typeof data.answer === "string"
-                ? data.answer
-                : JSON.stringify(data.answer)
+              content: typeof data.answer === "string" ? data.answer : JSON.stringify(data.answer)
             }]
           : [])
       ]);
-
-
-
     } catch (err) {
       setError(err.message);
     } finally {
@@ -100,21 +100,15 @@ function ChatWindow({ visitor = false }) {
           </div>
         ))}
 
-        {loading && (
-          <div className="bubble assistant">⏳ Réponse en cours...</div>
-        )}
+        {loading && <div className="bubble assistant">⏳ {t("visitorLoading")}</div>}
       </div>
 
       <div className="chat-input">
         <input
-          placeholder={
-            visitor
-              ? "Posez votre question sur SmartIA…"
-              : "Posez votre question…"
-          }
+          placeholder={visitor ? t("visitorPlaceholderSmartIA") : t("visitorPlaceholderQuestion")}
           value={question}
-          onChange={e => setQuestion(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && askRAG()}
+          onChange={(e) => setQuestion(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && askRAG()}
         />
         <button onClick={askRAG}>➤</button>
       </div>
