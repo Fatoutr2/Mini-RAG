@@ -174,11 +174,14 @@ const messages = {
     roleAdmin: "ADMIN",
     roleMember: "MITGLIED",
     language: "Sprache",
+    profile: "Profil",
+    settings: "Einstellungen",
+    profileMenu: "Profilmenü",
 
     newChat: "Neuer Chat",
     creating: "Wird erstellt...",
     searchChat: "Chats suchen",
-    yourChats: "IHRE CHATS",
+    yourChats: "DEINE CHATS",
     rename: "Umbenennen",
     delete: "Löschen",
     deleteChatConfirm: "Diesen Chat löschen?",
@@ -319,83 +322,6 @@ const messages = {
     noFilesFound: "No se encontraron archivos.",
     renameFilePrompt: "Nuevo nombre del archivo",
     deleteFileConfirm: "¿Eliminar archivo {filename}?",
-  },
-  ar: {
-    menuToggle: "فتح/إغلاق القائمة",
-    rag: "RAG",
-    chat: "دردشة",
-    darkMode: "الوضع الداكن",
-    lightMode: "الوضع الفاتح",
-    roleAdmin: "مشرف",
-    roleMember: "عضو",
-    language: "اللغة",
-    profile: "الملف الشخصي",
-    settings: "الإعدادات",
-    profileMenu: "قائمة الملف الشخصي",
-    newChat: "محادثة جديدة",
-    creating: "جاري الإنشاء...",
-    searchChat: "بحث في المحادثات",
-    yourChats: "محادثاتك",
-    rename: "إعادة تسمية",
-    delete: "حذف",
-    deleteChatConfirm: "حذف هذه المحادثة؟",
-    newTitlePrompt: "عنوان جديد",
-    uploadImpossible: "تعذر الرفع",
-    uploadDoneIn: "تم رفع الملف في",
-    addFile: "إضافة ملف",
-    uploadProgress: "جاري الرفع...",
-    logout: "تسجيل الخروج",
-    destinationPrompt: "الوجهة؟ اكتب public أو private",
-    destinationInvalid: "وجهة غير صالحة. استخدم public أو private.",
-    adminAccess: "الوصول",
-    adminMembers: "الأعضاء",
-    adminAdmins: "المشرفون",
-    loadMessagesError: "تعذر تحميل الرسائل",
-    uploadFileError: "تعذر رفع الملف",
-    serverError: "خطأ في الخادم",
-    askHelpTitle: "كيف يمكنني مساعدتك اليوم؟",
-    askHelpSubtitle: "اطرح أسئلة حول مستنداتك أو تحدث بحرية مع SmartIA.",
-    analyzeDoc: "تحليل مستند",
-    analyzeDocHint: "حمّل PDF ثم اطرح أسئلة دقيقة.",
-    fullFile: "إظهار الملف كاملًا",
-    fullFileHint: "اطلب: الملف الكامل اسم_الملف.",
-    attachedFiles: "الملفات المرفقة",
-    sendMessage: "أرسل رسالة...",
-    createChatFirst: "أنشئ محادثة جديدة أولًا...",
-    addFileAria: "إضافة ملف",
-    accessTitle: "🔑 الوصول",
-    accessSubtitle: "إنشاء المستخدمين وإدارة كل صلاحيات الوصول.",
-    addUser: "إضافة مستخدم",
-    email: "البريد الإلكتروني",
-    password: "كلمة المرور",
-    active: "نشط",
-    add: "إضافة",
-    usersList: "كل المستخدمين",
-    searchUsers: "بحث عن مستخدم",
-    userDetails: "تفاصيل المستخدم",
-    noUsersFound: "لا يوجد مستخدمون.",
-    actions: "الإجراءات",
-    edit: "تعديل",
-    changeRole: "تغيير الدور",
-    enableAccess: "تفعيل الوصول",
-    disableAccess: "تعطيل الوصول",
-    yes: "نعم",
-    no: "لا",
-    accessConfirm: "هل تريد {action} وصول {email}؟",
-    rolePrompt: "الدور الجديد: member/admin/visitor",
-    emailPrompt: "بريد إلكتروني جديد",
-    deleteUserConfirm: "حذف {email}؟",
-    filesManagement: "إدارة الملفات (RAG)",
-    searchFiles: "بحث عن ملف",
-    refresh: "تحديث",
-    loading: "جاري التحميل...",
-    file: "الملف",
-    visibility: "الظهور",
-    sizeBytes: "الحجم (بايت)",
-    updatedAt: "آخر تحديث",
-    noFilesFound: "لا توجد ملفات.",
-    renameFilePrompt: "اسم الملف الجديد",
-    deleteFileConfirm: "حذف الملف {filename}؟",
   },
 };
 

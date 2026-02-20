@@ -271,14 +271,14 @@
   border: 1px solid var(--border);
   background: var(--bg-soft);
   border-radius: 10px;
-  padding: 0 10px;
+  padding: 0 8px;
 }
 
 .admin-search-input {
   border: none;
   background: transparent;
   color: var(--text-main);
-  padding: 10px 2px;
+  padding: 8px 2px;
   min-width: 180px;
   outline: none;
 }
@@ -338,7 +338,7 @@
   background: transparent;
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(180px, 2fr) minmax(80px, 0.8fr) minmax(90px, 0.8fr) minmax(90px, 0.8fr);
+  grid-template-columns: minmax(220px, 2fr) minmax(90px, 0.9fr);
   align-items: center;
   gap: 10px;
   color: var(--text-main);
@@ -352,9 +352,8 @@
   overflow-wrap: anywhere;
 }
 
-.user-col.id {
-  color: var(--text-dim);
-  font-size: 13px;
+.user-col.role {
+  justify-self: start;
 }
 
 .user-list-actions {
@@ -376,4 +375,13 @@
 .user-list-details p {
   margin: 0 0 6px;
   font-size: 14px;
+}
+
+
+.admin-btn.icon-only {
+  width: 38px;
+  padding: 8px 0;
+  display: inline-grid;
+  place-items: center;
+  font-size: 16px;
 }

@@ -271,9 +271,7 @@ export default function AccessPage() {
                       }}
                     >
                       <span className="user-col email">{u.email}</span>
-                      <span className="user-col id">ID: {u.id}</span>
                       <span className="user-col role"><span className={`role-badge ${u.role}`}>{u.role}</span></span>
-                      <span className="user-col active"><span className={`status-badge ${u.is_active ? "active" : "inactive"}`}>{u.is_active ? t("yes") : t("no")}</span></span>
                     </button>
 
                     <div className="user-list-actions" ref={userMenuOpenFor === u.id ? userMenuRef : null}>
@@ -325,7 +323,7 @@ export default function AccessPage() {
                   <option value="private">private</option>
                   <option value="public">public</option>
                 </select>
-                <button className="admin-btn" onClick={() => loadFiles(fileVisibility)} disabled={filesLoading}>{filesLoading ? t("loading") : t("refresh")}</button>
+                <button className="admin-btn icon-only" onClick={() => loadFiles(fileVisibility)} disabled={filesLoading} title={t("refresh")} aria-label={t("refresh")}>↻</button>
               </div>
             </div>
 
@@ -334,8 +332,6 @@ export default function AccessPage() {
                 <thead>
                   <tr>
                     <th>{t("file")}</th>
-                    <th>{t("visibility")}</th>
-                    <th>{t("sizeBytes")}</th>
                     <th>{t("updatedAt")}</th>
                     <th>{t("actions")}</th>
                   </tr>
@@ -343,14 +339,12 @@ export default function AccessPage() {
                 <tbody>
                   {!filesLoading && filteredFiles.length === 0 && (
                     <tr>
-                      <td colSpan={5}>{t("noFilesFound")}</td>
+                      <td colSpan={3}>{t("noFilesFound")}</td>
                     </tr>
                   )}
                   {filteredFiles.map((file) => (
                     <tr key={`${file.visibility}-${file.filename}`}>
                       <td>{file.filename}</td>
-                      <td><span className={`visibility-badge ${file.visibility}`}>{file.visibility}</span></td>
-                      <td>{file.size}</td>
                       <td>{file.updated_at ? new Date(file.updated_at * 1000).toLocaleString(lang) : "-"}</td>
                       <td>
                         <div className="thread-menu-wrap" ref={fileMenuOpenFor === `${file.visibility}-${file.filename}` ? fileMenuRef : null}>
