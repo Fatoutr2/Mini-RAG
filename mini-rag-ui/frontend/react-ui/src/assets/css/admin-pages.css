@@ -51,7 +51,7 @@
 
 .admin-form {
   display: grid;
-  gap: 10px;
+  gap: 7px;
   max-width: 480px;
 }
 
@@ -294,7 +294,7 @@
   .admin-search-input,
   .admin-files-actions .admin-select,
   .admin-files-actions .admin-btn {
-    width: 100%;
+    width: 50%;
   }
 
   .user-list-card {
@@ -303,7 +303,7 @@
 
   .user-list-summary {
     grid-template-columns: 1fr;
-    gap: 6px;
+    gap: 4px;
   }
 
   .user-col {
@@ -315,7 +315,7 @@
 .users-list-wrap {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
 }
 
 .user-list-card {
@@ -325,8 +325,8 @@
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: 4px;
+  padding: 4px 5px;
 }
 
 .user-list-card.expanded {
@@ -340,11 +340,11 @@
   display: grid;
   grid-template-columns: minmax(220px, 2fr) minmax(90px, 0.9fr);
   align-items: center;
-  gap: 10px;
+  gap: 4px;
   color: var(--text-main);
   text-align: left;
   cursor: pointer;
-  padding: 8px;
+  padding: 4px;
 }
 
 .user-col.email {
@@ -363,8 +363,8 @@
 .user-list-details {
   grid-column: 1 / -1;
   border-top: 1px solid var(--border);
-  margin: 2px 6px 0;
-  padding: 10px 8px 6px;
+  margin: 1px 4px 0;
+  padding: 6px 4px 4px;
 }
 
 .user-list-details h3 {
@@ -380,8 +380,8 @@
 
 .admin-btn.icon-only {
   width: 38px;
-  padding: 8px 0;
+  padding: 8px 4px;
   display: inline-grid;
   place-items: center;
-  font-size: 16px;
+  font-size: 20px;
 }

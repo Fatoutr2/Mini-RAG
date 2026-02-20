@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
+import { useI18n } from "../i18n/LanguageContext";
 import "../assets/css/login.css";
 
 function LoginModal({ onClose }) {
   const { login } = useAuth();
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,14 +20,14 @@ function LoginModal({ onClose }) {
 
       if (!res.ok) {
         const errData = await res.json();
-        setError(errData.detail || "Erreur login");
+        setError(errData.detail || t("loginError"));
         return;
       }
 
       const data = await res.json();
       login(data.access_token, data.role, data.refresh_token, email.trim());
     } catch (err) {
-      setError("Erreur réseau ou serveur");
+      setError(t("networkError"));
     }
   };
 
@@ -33,16 +35,16 @@ function LoginModal({ onClose }) {
     <div className="modal">
       <div className="modal-content">
         <button className="modal-close" onClick={onClose}>✕</button>
-        <h3>Connexion</h3>
+        <h3>{t("landingLogin")}</h3>
 
         <input
-          placeholder="Email"
+          placeholder={t("email")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
-          placeholder="Mot de passe"
+          placeholder={t("password")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
@@ -50,10 +52,10 @@ function LoginModal({ onClose }) {
         {error && <p className="error">{error}</p>}
 
         <button onClick={submit} className="hero-btn">
-          Se connecter
+          {t("loginAction")}
         </button>
         <button onClick={onClose} className="login-btn">
-          Annuler
+          {t("cancel")}
         </button>
       </div>
     </div>

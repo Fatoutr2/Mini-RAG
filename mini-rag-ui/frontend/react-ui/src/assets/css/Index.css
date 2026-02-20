@@ -72,6 +72,22 @@ body {
   font-size: 14px;
 }
 
+
+.landing-lang-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.landing-lang-picker {
+  border: 1px solid rgba(15, 23, 42, 0.25);
+  border-radius: 10px;
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.9);
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 12px;
+}
+
 /* =======================
    HAMBURGER
 ======================= */
