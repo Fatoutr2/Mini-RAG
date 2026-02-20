@@ -41,6 +41,19 @@ class AdminUpdateUserModel(BaseModel):
     password: Optional[str] = None
     role: Optional[str] = None
     is_active: Optional[bool] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+
+class UserProfileUpdateModel(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+    avatar_url: Optional[str] = None
 
 
 # --------- DB ----------
@@ -82,7 +95,7 @@ def register(data: RegisterModel):
 def login(data: LoginModel):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT id, password, role, is_active FROM users WHERE email = %s", (data.email,))
+    cur.execute("SELECT id, password, role, is_active, first_name, last_name, phone_number, address, avatar_url FROM users WHERE email = %s", (data.email,))
     user = cur.fetchone()
     cur.close()
     conn.close()
@@ -90,7 +103,7 @@ def login(data: LoginModel):
     if not user:
         raise HTTPException(401, "Email ou mot de passe incorrect")
 
-    user_id, hashed_password, role, is_active = user
+    user_id, hashed_password, role, is_active, first_name, last_name, phone_number, address, avatar_url = user
 
     if not is_active:
         raise HTTPException(403, "Utilisateur désactivé")
@@ -99,7 +112,7 @@ def login(data: LoginModel):
         raise HTTPException(401, "Email ou mot de passe incorrect")
 
     token = create_access_token({"user_id": user_id, "role": role})
-    return {"access_token": token, "token_type": "bearer", "role": role}
+    return {"access_token": token, "token_type": "bearer", "role": role, "email": data.email, "first_name": first_name, "last_name": last_name, "phone_number": phone_number, "address": address, "avatar_url": avatar_url}
 
 # -------- ADMIN USER MANAGEMENT ----------
 @router.get("/admin/users")
@@ -109,8 +122,8 @@ def list_users(user=Depends(get_current_user)):
 
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT id, email, role, is_active FROM users ORDER BY id")
-    users = [{"id": u[0], "email": u[1], "role": u[2], "is_active": u[3]} for u in cur.fetchall()]
+    cur.execute("SELECT id, email, role, is_active, first_name, last_name, phone_number, address, avatar_url FROM users ORDER BY id")
+    users = [{"id": u[0], "email": u[1], "role": u[2], "is_active": u[3], "first_name": u[4], "last_name": u[5], "phone_number": u[6], "address": u[7], "avatar_url": u[8]} for u in cur.fetchall()]
     cur.close()
     conn.close()
     return users
@@ -164,7 +177,7 @@ def create_user_by_admin(payload: AdminCreateUserModel, user=Depends(get_current
             """
             INSERT INTO users (email, password, role, is_active)
             VALUES (%s, %s, %s, %s)
-            RETURNING id, email, role, is_active
+            RETURNING id, email, role, is_active, first_name, last_name, phone_number, address, avatar_url, first_name, last_name, phone_number, address, avatar_url
             """,
             (payload.email, hashed_password, payload.role, payload.is_active)
         )
@@ -177,7 +190,7 @@ def create_user_by_admin(payload: AdminCreateUserModel, user=Depends(get_current
         cur.close()
         conn.close()
 
-    return {"id": row[0], "email": row[1], "role": row[2], "is_active": row[3]}
+    return {"id": row[0], "email": row[1], "role": row[2], "is_active": row[3], "first_name": row[4], "last_name": row[5], "phone_number": row[6], "address": row[7], "avatar_url": row[8]}
 
 
 @router.put("/admin/users/{user_id}")
@@ -206,6 +219,26 @@ def update_user_by_admin(user_id: int, payload: AdminUpdateUserModel, user=Depen
         fields.append("is_active=%s")
         values.append(payload.is_active)
 
+    if payload.first_name is not None:
+        fields.append("first_name=%s")
+        values.append(payload.first_name)
+
+    if payload.last_name is not None:
+        fields.append("last_name=%s")
+        values.append(payload.last_name)
+
+    if payload.phone_number is not None:
+        fields.append("phone_number=%s")
+        values.append(payload.phone_number)
+
+    if payload.address is not None:
+        fields.append("address=%s")
+        values.append(payload.address)
+
+    if payload.avatar_url is not None:
+        fields.append("avatar_url=%s")
+        values.append(payload.avatar_url)
+
     if not fields:
         raise HTTPException(400, "Aucune donnée à mettre à jour")
 
@@ -215,7 +248,7 @@ def update_user_by_admin(user_id: int, payload: AdminUpdateUserModel, user=Depen
     cur = conn.cursor()
     try:
         cur.execute(
-            f"UPDATE users SET {', '.join(fields)} WHERE id=%s RETURNING id, email, role, is_active"
+            f"UPDATE users SET {', '.join(fields)} WHERE id=%s RETURNING id, email, role, is_active, first_name, last_name, phone_number, address, avatar_url"
             , tuple(values)
         )
         row = cur.fetchone()
@@ -230,4 +263,99 @@ def update_user_by_admin(user_id: int, payload: AdminUpdateUserModel, user=Depen
     if not row:
         raise HTTPException(404, "Utilisateur introuvable")
 
-    return {"id": row[0], "email": row[1], "role": row[2], "is_active": row[3]}
+    return {"id": row[0], "email": row[1], "role": row[2], "is_active": row[3], "first_name": row[4], "last_name": row[5], "phone_number": row[6], "address": row[7], "avatar_url": row[8]}
+
+
+@router.get("/me")
+def get_my_profile(user=Depends(get_current_user)):
+    if not user.get("user_id"):
+        raise HTTPException(401, "Authentification requise")
+
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT id, email, role, is_active, first_name, last_name, phone_number, address, avatar_url
+        FROM users
+        WHERE id=%s
+        """,
+        (user["user_id"],)
+    )
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not row:
+        raise HTTPException(404, "Utilisateur introuvable")
+
+    return {
+        "id": row[0],
+        "email": row[1],
+        "role": row[2],
+        "is_active": row[3],
+        "first_name": row[4],
+        "last_name": row[5],
+        "phone_number": row[6],
+        "address": row[7],
+        "avatar_url": row[8],
+    }
+
+
+@router.put("/me")
+def update_my_profile(payload: UserProfileUpdateModel, user=Depends(get_current_user)):
+    if not user.get("user_id"):
+        raise HTTPException(401, "Authentification requise")
+
+    fields = []
+    values = []
+
+    if payload.first_name is not None:
+        fields.append("first_name=%s")
+        values.append(payload.first_name)
+
+    if payload.last_name is not None:
+        fields.append("last_name=%s")
+        values.append(payload.last_name)
+
+    if payload.phone_number is not None:
+        fields.append("phone_number=%s")
+        values.append(payload.phone_number)
+
+    if payload.address is not None:
+        fields.append("address=%s")
+        values.append(payload.address)
+
+    if payload.avatar_url is not None:
+        fields.append("avatar_url=%s")
+        values.append(payload.avatar_url)
+
+    if not fields:
+        raise HTTPException(400, "Aucune donnée à mettre à jour")
+
+    values.append(user["user_id"])
+
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        f"UPDATE users SET {', '.join(fields)} WHERE id=%s RETURNING id, email, role, is_active, first_name, last_name, phone_number, address, avatar_url",
+        tuple(values),
+    )
+    row = cur.fetchone()
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    if not row:
+        raise HTTPException(404, "Utilisateur introuvable")
+
+    return {
+        "id": row[0],
+        "email": row[1],
+        "role": row[2],
+        "is_active": row[3],
+        "first_name": row[4],
+        "last_name": row[5],
+        "phone_number": row[6],
+        "address": row[7],
+        "avatar_url": row[8],
+    }

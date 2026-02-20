@@ -109,6 +109,11 @@ def create_tables(conn):
       password TEXT NOT NULL,
       role VARCHAR(20) NOT NULL DEFAULT 'member',
       is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      first_name VARCHAR(120),
+      last_name VARCHAR(120),
+      phone_number VARCHAR(40),
+      address TEXT,
+      avatar_url TEXT,
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
 

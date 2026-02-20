@@ -299,9 +299,14 @@ export default function AccessPage() {
                     {isExpanded && (
                       <div className="user-list-details">
                         <h3>{t("userDetails")}</h3>
+                        {u.avatar_url && <img src={u.avatar_url} alt="avatar" className="user-detail-avatar" />}
                         <p><strong>ID:</strong> {u.id}</p>
                         <p><strong>{t("email")}:</strong> {u.email}</p>
                         <p><strong>{t("active")}:</strong> {u.is_active ? t("yes") : t("no")}</p>
+                        <p><strong>{t("firstName")}:</strong> {u.first_name || "-"}</p>
+                        <p><strong>{t("lastName")}:</strong> {u.last_name || "-"}</p>
+                        <p><strong>{t("phoneNumber")}:</strong> {u.phone_number || "-"}</p>
+                        <p><strong>{t("address")}:</strong> {u.address || "-"}</p>
                         <p><strong>Rôle:</strong> {u.role}</p>
                       </div>
                     )}
