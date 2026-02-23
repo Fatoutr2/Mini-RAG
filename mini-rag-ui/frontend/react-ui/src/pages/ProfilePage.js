@@ -14,6 +14,7 @@ export default function ProfilePage() {
   const fileInputRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -55,6 +56,7 @@ export default function ProfilePage() {
     e.preventDefault();
     setSaving(true);
     setError("");
+    setSuccess("");
     try {
       await updateMyProfile({
         first_name: form.first_name,
@@ -63,6 +65,7 @@ export default function ProfilePage() {
         address: form.address,
         avatar_url: form.avatar_url,
       });
+      setSuccess(t("saveSuccess"));
     } catch (e2) {
       setError(e2.message);
     } finally {
@@ -85,6 +88,7 @@ export default function ProfilePage() {
           </div>
 
           {error && <p className="admin-error">{error}</p>}
+          {success && <p className="admin-success">{success}</p>}
 
           <section className="admin-card profile-card">
             <h2 className="admin-card-title">{t("profileInfo")}</h2>
@@ -121,11 +125,12 @@ export default function ProfilePage() {
                 <span>{t("phoneNumber")}</span>
                 <input className="admin-input" value={form.phone_number} onChange={(e) => setForm((p) => ({ ...p, phone_number: e.target.value }))} />
               </label>
-              <label>
+              <label className="profile-grid-full">
                 <span>{t("address")}</span>
                 <input className="admin-input" value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} />
               </label>
-              <button className="admin-btn primary" disabled={saving}>{saving ? t("loading") : t("save")}</button>
+
+              <button className="admin-btn primary profile-save-btn" disabled={saving}>{saving ? t("loading") : t("save")}</button>
             </form>
           </section>
         </main>

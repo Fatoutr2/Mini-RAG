@@ -11,13 +11,26 @@ import { MoreIcon, SearchIcon } from "../components/Icons";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
+const blankCreateForm = {
+  email: "",
+  password: "",
+  role: "member",
+  is_active: true,
+  first_name: "",
+  last_name: "",
+  phone_number: "",
+  address: "",
+  avatar_url: "",
+};
+
 export default function AccessPage() {
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 900);
   const { t, lang } = useI18n();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ email: "", password: "", role: "member", is_active: true });
+  const [form, setForm] = useState(blankCreateForm);
   const navigate = useNavigate();
   const [threads, setThreads] = useState([]);
   const [activeThreadId, setActiveThreadId] = useState(null);
@@ -31,6 +44,9 @@ export default function AccessPage() {
   const [expandedUserId, setExpandedUserId] = useState(null);
   const [userMenuOpenFor, setUserMenuOpenFor] = useState(null);
   const [fileMenuOpenFor, setFileMenuOpenFor] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [editing, setEditing] = useState(false);
   const userMenuRef = useRef(null);
   const fileMenuRef = useRef(null);
 
@@ -78,22 +94,52 @@ export default function AccessPage() {
   const onCreate = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
+    setSuccess("");
     try {
       await createUser(form);
-      setForm({ email: "", password: "", role: "member", is_active: true });
+      setForm(blankCreateForm);
+      setSuccess(t("userCreateSuccess"));
       await loadUsers();
-    } catch (e) {
-      setError(e.message);
+    } catch (e2) {
+      setError(e2.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const onEdit = async (u) => {
-    const email = prompt(t("emailPrompt"), u.email);
-    if (!email) return;
-    await updateUser(u.id, { email: email.trim() });
-    await loadUsers();
+  const openEditModal = (u) => {
+    setEditForm({
+      email: u.email || "",
+      password: "",
+      role: u.role || "member",
+      is_active: !!u.is_active,
+      first_name: u.first_name || "",
+      last_name: u.last_name || "",
+      phone_number: u.phone_number || "",
+      address: u.address || "",
+    });
+    setEditingUser(u);
+  };
+
+  const onEditSave = async (e) => {
+    e.preventDefault();
+    if (!editingUser || !editForm) return;
+
+    try {
+      setEditing(true);
+      setError("");
+      setSuccess("");
+      await updateUser(editingUser.id, editForm);
+      setEditingUser(null);
+      setEditForm(null);
+      setSuccess(t("userUpdateSuccess"));
+      await loadUsers();
+    } catch (e2) {
+      setError(e2.message);
+    } finally {
+      setEditing(false);
+    }
   };
 
   const onRole = async (u) => {
@@ -231,9 +277,13 @@ export default function AccessPage() {
 
           <section className="admin-card">
             <h2 className="admin-card-title">{t("addUser")}</h2>
-            <form className="admin-form" onSubmit={onCreate}>
+            <form className="admin-form admin-form-wide" onSubmit={onCreate}>
               <input className="admin-input" type="email" placeholder={t("email")} value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} required />
               <input className="admin-input" type="password" placeholder={t("password")} value={form.password} onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))} required />
+              <input className="admin-input" placeholder={t("firstName")} value={form.first_name} onChange={(e) => setForm((p) => ({ ...p, first_name: e.target.value }))} />
+              <input className="admin-input" placeholder={t("lastName")} value={form.last_name} onChange={(e) => setForm((p) => ({ ...p, last_name: e.target.value }))} />
+              <input className="admin-input" placeholder={t("phoneNumber")} value={form.phone_number} onChange={(e) => setForm((p) => ({ ...p, phone_number: e.target.value }))} />
+              <input className="admin-input" placeholder={t("address")} value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} />
               <select className="admin-select" value={form.role} onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}>
                 <option value="member">member</option>
                 <option value="admin">admin</option>
@@ -247,6 +297,7 @@ export default function AccessPage() {
           </section>
 
           {error && <p className="admin-error">{error}</p>}
+          {success && <p className="admin-success">{success}</p>}
 
           <section className="admin-card">
             <div className="admin-section-header">
@@ -286,7 +337,7 @@ export default function AccessPage() {
                       </button>
                       {userMenuOpenFor === u.id && (
                         <div className="thread-dropdown">
-                          <button onClick={() => { onEdit(u); setUserMenuOpenFor(null); }}>{t("edit")}</button>
+                          <button onClick={() => { openEditModal(u); setUserMenuOpenFor(null); }}>{t("edit")}</button>
                           <button onClick={() => { onRole(u); setUserMenuOpenFor(null); }}>{t("changeRole")}</button>
                           <button className={u.is_active ? "danger" : ""} onClick={() => { onToggleAccess(u); setUserMenuOpenFor(null); }}>
                             {u.is_active ? t("disableAccess") : t("enableAccess")}
@@ -372,6 +423,37 @@ export default function AccessPage() {
           </section>
         </main>
       </div>
+      
+      {editingUser && editForm && (
+        <div className="admin-modal-backdrop" onClick={() => setEditingUser(null)}>
+          <section className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="admin-card-title">{t("editUserTitle")}</h2>
+            <p className="admin-page-subtitle">ID: {editingUser.id}</p>
+            <form className="admin-form admin-form-wide" onSubmit={onEditSave}>
+              <input className="admin-input" type="email" placeholder={t("email")} value={editForm.email} onChange={(e) => setEditForm((p) => ({ ...p, email: e.target.value }))} required />
+              <input className="admin-input" type="password" placeholder={t("newPasswordOptional")} value={editForm.password} onChange={(e) => setEditForm((p) => ({ ...p, password: e.target.value }))} />
+              <input className="admin-input" placeholder={t("firstName")} value={editForm.first_name} onChange={(e) => setEditForm((p) => ({ ...p, first_name: e.target.value }))} />
+              <input className="admin-input" placeholder={t("lastName")} value={editForm.last_name} onChange={(e) => setEditForm((p) => ({ ...p, last_name: e.target.value }))} />
+              <input className="admin-input" placeholder={t("phoneNumber")} value={editForm.phone_number} onChange={(e) => setEditForm((p) => ({ ...p, phone_number: e.target.value }))} />
+              <input className="admin-input" placeholder={t("address")} value={editForm.address} onChange={(e) => setEditForm((p) => ({ ...p, address: e.target.value }))} />
+              <input className="admin-input admin-form-full" placeholder={t("avatarUrl")} value={editForm.avatar_url} onChange={(e) => setEditForm((p) => ({ ...p, avatar_url: e.target.value }))} />
+              <select className="admin-select" value={editForm.role} onChange={(e) => setEditForm((p) => ({ ...p, role: e.target.value }))}>
+                <option value="visitor">visitor</option>
+                <option value="member">member</option>
+                <option value="admin">admin</option>
+              </select>
+              <label className="admin-checkbox">
+                <input type="checkbox" checked={editForm.is_active} onChange={(e) => setEditForm((p) => ({ ...p, is_active: e.target.checked }))} />
+                {t("active")}
+              </label>
+              <div className="admin-modal-actions admin-form-full">
+                <button className="admin-btn" type="button" onClick={() => setEditingUser(null)}>{t("cancel")}</button>
+                <button className="admin-btn primary" disabled={editing}>{editing ? t("saving") : t("save")}</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

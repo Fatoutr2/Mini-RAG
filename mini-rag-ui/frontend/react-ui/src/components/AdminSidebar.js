@@ -22,6 +22,7 @@ export default function AdminSidebar({
   const [menuOpenFor, setMenuOpenFor] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [chatsCollapsed, setChatsCollapsed] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const menuRef = useRef(null);
   const sidebarRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -45,15 +46,13 @@ export default function AdminSidebar({
     if (window.innerWidth <= 900) onClose?.();
   };
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
+  const uploadSelectedFile = async (file) => {
     if (!file || !onUploadFile) return;
 
     const visibility = window.prompt(t("destinationPrompt"), "private")?.trim().toLowerCase() || "private";
 
     if (!["public", "private"].includes(visibility)) {
       window.alert(t("destinationInvalid"));
-      e.target.value = "";
       return;
     }
 
@@ -61,12 +60,25 @@ export default function AdminSidebar({
     try {
       await onUploadFile(file, visibility);
       window.alert(`${t("uploadDoneIn")} data/${visibility}`);
+      closeIfMobile();
     } catch (err) {
       window.alert(err.message || t("uploadImpossible"));
     } finally {
       setUploading(false);
-      e.target.value = "";
     }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    await uploadSelectedFile(file);
+    e.target.value = "";
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    setDragActive(false);
+    const file = e.dataTransfer?.files?.[0];
+    await uploadSelectedFile(file);
   };
 
   return (
@@ -130,7 +142,15 @@ export default function AdminSidebar({
 
       <div className="sidebar-bottom">
         <input ref={fileInputRef} type="file" style={{ display: "none" }} onChange={handleFileChange} />
-        <button className="sidebar-btn" onClick={() => { fileInputRef.current?.click(); closeIfMobile(); }} disabled={uploading}>
+        <button
+          className={`sidebar-btn ${dragActive ? "drag-active" : ""}`}
+          onClick={() => { fileInputRef.current?.click(); closeIfMobile(); }}
+          onDragOver={(e) => { e.preventDefault(); if (!uploading) setDragActive(true); }}
+          onDragEnter={(e) => { e.preventDefault(); if (!uploading) setDragActive(true); }}
+          onDragLeave={() => setDragActive(false)}
+          onDrop={handleDrop}
+          disabled={uploading}
+        >
           <FileIcon className="icon-16" />
           {uploading ? t("uploadProgress") : t("addFile")}
         </button>

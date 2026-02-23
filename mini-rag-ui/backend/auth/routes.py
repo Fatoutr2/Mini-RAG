@@ -34,6 +34,11 @@ class AdminCreateUserModel(BaseModel):
     password: str
     role: str  # "member" | "admin"
     is_active: bool = True
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+    avatar_url: Optional[str] = None
 
 
 class AdminUpdateUserModel(BaseModel):
@@ -175,11 +180,21 @@ def create_user_by_admin(payload: AdminCreateUserModel, user=Depends(get_current
     try:
         cur.execute(
             """
-            INSERT INTO users (email, password, role, is_active)
-            VALUES (%s, %s, %s, %s)
-            RETURNING id, email, role, is_active, first_name, last_name, phone_number, address, avatar_url, first_name, last_name, phone_number, address, avatar_url
+            INSERT INTO users (email, password, role, is_active, first_name, last_name, phone_number, address, avatar_url)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id, email, role, is_active, first_name, last_name, phone_number, address, avatar_url
             """,
-            (payload.email, hashed_password, payload.role, payload.is_active)
+            (
+                payload.email,
+                hashed_password,
+                payload.role,
+                payload.is_active,
+                payload.first_name,
+                payload.last_name,
+                payload.phone_number,
+                payload.address,
+                payload.avatar_url,
+            )
         )
         row = cur.fetchone()
         conn.commit()

@@ -21,6 +21,7 @@ export default function MemberSidebar({
   const [menuOpenFor, setMenuOpenFor] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [chatsCollapsed, setChatsCollapsed] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const menuRef = useRef(null);
   const sidebarRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -29,8 +30,7 @@ export default function MemberSidebar({
     if (window.innerWidth <= 900) onClose?.();
   };
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
+  const uploadSelectedFile = async (file) => {
     if (!file || !onUploadFile) return;
 
     setUploading(true);
@@ -42,8 +42,20 @@ export default function MemberSidebar({
       window.alert(err.message || t("uploadImpossible"));
     } finally {
       setUploading(false);
-      e.target.value = "";
     }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    await uploadSelectedFile(file);
+    e.target.value = "";
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    setDragActive(false);
+    const file = e.dataTransfer?.files?.[0];
+    await uploadSelectedFile(file);
   };
 
   useEffect(() => {
@@ -113,7 +125,15 @@ export default function MemberSidebar({
 
       <div className="sidebar-bottom">
         <input ref={fileInputRef} type="file" style={{ display: "none" }} onChange={handleFileChange} />
-        <button className="sidebar-btn" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+        <button
+          className={`sidebar-btn ${dragActive ? "drag-active" : ""}`}
+          onClick={() => fileInputRef.current?.click()}
+          onDragOver={(e) => { e.preventDefault(); if (!uploading) setDragActive(true); }}
+          onDragEnter={(e) => { e.preventDefault(); if (!uploading) setDragActive(true); }}
+          onDragLeave={() => setDragActive(false)}
+          onDrop={handleDrop}
+          disabled={uploading}
+        >
           <FileIcon className="icon-16" />
           {uploading ? t("uploadProgress") : t("addFile")}
         </button>
