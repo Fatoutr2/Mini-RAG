@@ -8,7 +8,7 @@ import { listThreads, createThread, renameThread, deleteThread } from "../servic
 import { uploadDocument } from "../services/uploadService";
 import { deleteUploadedFile, listUploadedFiles, renameUploadedFile } from "../services/adminFileService";
 import { MoreIcon, SearchIcon } from "../components/Icons";
-import { toast } from "sonner";
+import { toast } from "../utils/toast";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
@@ -47,6 +47,7 @@ export default function AccessPage() {
   const [editingUser, setEditingUser] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [editing, setEditing] = useState(false);
+  const [confirmState, setConfirmState] = useState(null);
   const userMenuRef = useRef(null);
   const fileMenuRef = useRef(null);
 
@@ -147,24 +148,39 @@ export default function AccessPage() {
     await loadUsers();
   };
 
-  const onDelete = async (u) => {
-    if (!window.confirm(t("deleteUserConfirm", { email: u.email }))) return;
-    await deleteUser(u.id);
-    await loadUsers();
+  const openConfirmation = (message, onConfirm) => {
+    setConfirmState({ message, onConfirm, loading: false });
   };
 
-  const onToggleAccess = async (u) => {
-    const nextState = !u.is_active;
-    const actionLabel = nextState ? t("enableAccess") : t("disableAccess");
-    if (!window.confirm(t("accessConfirm", { action: actionLabel.toLowerCase(), email: u.email }))) return;
+  const onConfirmAction = async () => {
+    if (!confirmState?.onConfirm) return;
 
     try {
+      setConfirmState((prev) => ({ ...prev, loading: true }));
+      await confirmState.onConfirm();
+      setConfirmState(null);
+    } catch (e) {
+      setError(e.message);
+      setConfirmState(null);
+    }
+  };
+
+  const onDelete = (u) => {
+    openConfirmation(t("deleteUserConfirm", { email: u.email }), async () => {
+      await deleteUser(u.id);
+      await loadUsers();
+    });
+  };
+
+  const onToggleAccess = (u) => {
+    const nextState = !u.is_active;
+    const actionLabel = nextState ? t("enableAccess") : t("disableAccess");
+
+    openConfirmation(t("accessConfirm", { action: actionLabel.toLowerCase(), email: u.email }), async () => {
       setError("");
       await updateUser(u.id, { is_active: nextState });
       await loadUsers();
-    } catch (e) {
-      setError(e.message);
-    }
+    });
   };
 
   const filteredUsers = useMemo(() => {
@@ -179,16 +195,12 @@ export default function AccessPage() {
     return uploadedFiles.filter((file) => `${file.filename} ${file.visibility}`.toLowerCase().includes(q));
   }, [uploadedFiles, fileSearch]);
 
-  const onDeleteFile = async (file) => {
-    if (!window.confirm(t("deleteFileConfirm", { filename: file.filename }))) return;
-
-    try {
+  const onDeleteFile = (file) => {
+    openConfirmation(t("deleteFileConfirm", { filename: file.filename }), async () => {
       setError("");
       await deleteUploadedFile(file.visibility, file.filename);
       await loadFiles(fileVisibility);
-    } catch (e) {
-      setError(e.message);
-    }
+    });
   };
 
   const onRenameFile = async (file) => {
@@ -420,6 +432,19 @@ export default function AccessPage() {
           </section>
         </main>
       </div>
+
+      {confirmState && (
+        <div className="admin-modal-backdrop" onClick={() => !confirmState.loading && setConfirmState(null)}>
+          <section className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="admin-card-title">{t("actions")}</h2>
+            <p className="admin-page-subtitle">{confirmState.message}</p>
+            <div className="admin-modal-actions" style={{ marginTop: 12 }}>
+              <button className="admin-btn" type="button" disabled={confirmState.loading} onClick={() => setConfirmState(null)}>{t("no")}</button>
+              <button className="admin-btn primary" type="button" disabled={confirmState.loading} onClick={onConfirmAction}>{confirmState.loading ? t("loading") : t("yes")}</button>
+            </div>
+          </section>
+        </div>
+      )}
       
       {editingUser && editForm && (
         <div className="admin-modal-backdrop" onClick={() => setEditingUser(null)}>

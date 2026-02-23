@@ -4,7 +4,7 @@ import { useI18n } from "../i18n/LanguageContext";
 import { FileIcon, KeyIcon, MoreIcon, PlusIcon, SearchIcon, ShieldIcon, UsersIcon } from "./Icons";
 import "../assets/css/sidebar.css";
 import "../assets/css/layout.css";
-import { toast } from "sonner";
+import { toast } from "../utils/toast";
 
 export default function AdminSidebar({
   open,

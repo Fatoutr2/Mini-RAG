@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import { useAuth } from "../auth/AuthContext";
 import { useI18n } from "../i18n/LanguageContext";
 import { getMyProfile, updateMyProfile } from "../services/profileService";
-import { toast } from "sonner";
+import { toast } from "../utils/toast";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 

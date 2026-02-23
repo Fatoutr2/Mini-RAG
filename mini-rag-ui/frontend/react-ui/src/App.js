@@ -111,7 +111,7 @@ function App() {
 export default App;
 */
 import { Routes, Route } from "react-router-dom";
-import { Toaster } from "sonner";
+import { Toaster } from "./utils/toast";
 import MemberPage from "./pages/MemberPage";
 import AdminPage from "./pages/AdminPage";
 import Index from "./pages/Index";
@@ -184,7 +184,7 @@ function App() {
       />
 
     </Routes>
-    <Toaster richColors position="top-right" />
+    <Toaster />
     </>
   );
 }

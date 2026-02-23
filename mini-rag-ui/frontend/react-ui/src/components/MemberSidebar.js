@@ -3,7 +3,7 @@ import { useI18n } from "../i18n/LanguageContext";
 import { FileIcon, MoreIcon, PlusIcon, SearchIcon } from "./Icons";
 import "../assets/css/sidebar.css";
 import "../assets/css/layout.css";
-import { toast } from "sonner";
+import { toast } from "../utils/toast";
 
 export default function MemberSidebar({
   open,
