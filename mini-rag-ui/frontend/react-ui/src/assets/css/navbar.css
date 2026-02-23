@@ -201,3 +201,22 @@
     min-width: 170px;
   }
 }
+
+.nav-back-btn {
+  width: auto;
+  min-width: 96px;
+  height: 38px;
+  padding: 0 12px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.nav-back-btn span {
+  display: none;
+}

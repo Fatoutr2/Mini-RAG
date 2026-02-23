@@ -48,6 +48,8 @@ export default function AccessPage() {
   const [editForm, setEditForm] = useState(null);
   const [editing, setEditing] = useState(false);
   const [confirmState, setConfirmState] = useState(null);
+  const [renameFileState, setRenameFileState] = useState(null);
+  const [roleState, setRoleState] = useState(null);
   const userMenuRef = useRef(null);
   const fileMenuRef = useRef(null);
 
@@ -141,11 +143,27 @@ export default function AccessPage() {
     }
   };
 
-  const onRole = async (u) => {
-    const role = prompt(t("rolePrompt"), u.role);
-    if (!role) return;
-    await updateUserRole(u.id, role.trim());
-    await loadUsers();
+  const onRole = (u) => {
+    setRoleState({
+      userId: u.id,
+      email: u.email,
+      role: u.role || "member",
+      loading: false,
+    });
+  };
+
+  const onConfirmRoleChange = async () => {
+    if (!roleState?.userId || !roleState?.role?.trim()) return;
+
+    try {
+      setRoleState((prev) => ({ ...prev, loading: true }));
+      await updateUserRole(roleState.userId, roleState.role.trim());
+      setRoleState(null);
+      await loadUsers();
+    } catch (e) {
+      setError(e.message);
+      setRoleState(null);
+    }
   };
 
   const openConfirmation = (message, onConfirm) => {
@@ -203,16 +221,27 @@ export default function AccessPage() {
     });
   };
 
-  const onRenameFile = async (file) => {
-    const nextName = prompt(t("renameFilePrompt"), file.filename);
-    if (!nextName) return;
+  const onRenameFile = (file) => {
+    setRenameFileState({
+      visibility: file.visibility,
+      filename: file.filename,
+      nextName: file.filename,
+      loading: false,
+    });
+  };
+
+  const onConfirmRenameFile = async () => {
+    if (!renameFileState?.filename || !renameFileState?.nextName?.trim()) return;
 
     try {
+      setRenameFileState((prev) => ({ ...prev, loading: true }));
       setError("");
-      await renameUploadedFile(file.visibility, file.filename, nextName.trim());
-      await loadFiles(fileVisibility);
+      await renameUploadedFile(renameFileState.visibility, renameFileState.filename, renameFileState.nextName.trim());
+      setRenameFileState(null);
+      await loadFiles(renameFileState.visibility);
     } catch (e) {
       setError(e.message);
+      setRenameFileState(null);
     }
   };
 
@@ -441,6 +470,37 @@ export default function AccessPage() {
             <div className="admin-modal-actions" style={{ marginTop: 12 }}>
               <button className="admin-btn" type="button" disabled={confirmState.loading} onClick={() => setConfirmState(null)}>{t("no")}</button>
               <button className="admin-btn primary" type="button" disabled={confirmState.loading} onClick={onConfirmAction}>{confirmState.loading ? t("loading") : t("yes")}</button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {roleState && (
+        <div className="admin-modal-backdrop" onClick={() => !roleState.loading && setRoleState(null)}>
+          <section className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="admin-card-title">{t("changeRole")}</h2>
+            <p className="admin-page-subtitle">{roleState.email}</p>
+            <select className="admin-select" value={roleState.role} onChange={(e) => setRoleState((prev) => ({ ...prev, role: e.target.value }))}>
+              <option value="member">member</option>
+              <option value="admin">admin</option>
+            </select>
+            <div className="admin-modal-actions" style={{ marginTop: 12 }}>
+              <button className="admin-btn" type="button" disabled={roleState.loading} onClick={() => setRoleState(null)}>{t("cancel")}</button>
+              <button className="admin-btn primary" type="button" disabled={roleState.loading} onClick={onConfirmRoleChange}>{roleState.loading ? t("loading") : t("save")}</button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {renameFileState && (
+        <div className="admin-modal-backdrop" onClick={() => !renameFileState.loading && setRenameFileState(null)}>
+          <section className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="admin-card-title">{t("rename")}</h2>
+            <p className="admin-page-subtitle">{t("renameFilePrompt")}</p>
+            <input className="admin-input" value={renameFileState.nextName} onChange={(e) => setRenameFileState((prev) => ({ ...prev, nextName: e.target.value }))} />
+            <div className="admin-modal-actions" style={{ marginTop: 12 }}>
+              <button className="admin-btn" type="button" disabled={renameFileState.loading} onClick={() => setRenameFileState(null)}>{t("cancel")}</button>
+              <button className="admin-btn primary" type="button" disabled={renameFileState.loading} onClick={onConfirmRenameFile}>{renameFileState.loading ? t("loading") : t("save")}</button>
             </div>
           </section>
         </div>

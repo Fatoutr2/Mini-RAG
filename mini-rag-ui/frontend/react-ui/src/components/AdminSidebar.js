@@ -24,6 +24,9 @@ export default function AdminSidebar({
   const [uploading, setUploading] = useState(false);
   const [chatsCollapsed, setChatsCollapsed] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [renameState, setRenameState] = useState(null);
+  const [deleteState, setDeleteState] = useState(null);
+  const [uploadState, setUploadState] = useState(null);
   const menuRef = useRef(null);
   const sidebarRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -47,23 +50,23 @@ export default function AdminSidebar({
     if (window.innerWidth <= 900) onClose?.();
   };
 
-  const uploadSelectedFile = async (file) => {
+  const startUploadFlow = (file) => {
     if (!file || !onUploadFile) return;
+    setUploadState({ file, visibility: "private", loading: false });
+  };
 
-    const visibility = window.prompt(t("destinationPrompt"), "private")?.trim().toLowerCase() || "private";
-
-    if (!["public", "private"].includes(visibility)) {
-      toast.error(t("destinationInvalid"));
-      return;
-    }
-
-    setUploading(true);
+    const onConfirmUpload = async () => {
+    if (!uploadState?.file) return;
     try {
-      await onUploadFile(file, visibility);
-      toast.success(`${t("uploadDoneIn")} data/${visibility}`);
+      setUploading(true);
+      setUploadState((prev) => ({ ...prev, loading: true }));
+      await onUploadFile(uploadState.file, uploadState.visibility);
+      toast.success(`${t("uploadDoneIn")} data/${uploadState.visibility}`);
+      setUploadState(null);
       closeIfMobile();
     } catch (err) {
       toast.error(err.message || t("uploadImpossible"));
+      setUploadState(null);
     } finally {
       setUploading(false);
     }
@@ -71,7 +74,7 @@ export default function AdminSidebar({
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-    await uploadSelectedFile(file);
+    startUploadFlow(file);
     e.target.value = "";
   };
 
@@ -79,84 +82,143 @@ export default function AdminSidebar({
     e.preventDefault();
     setDragActive(false);
     const file = e.dataTransfer?.files?.[0];
-    await uploadSelectedFile(file);
+    startUploadFlow(file);
   };
 
-  return (
-    <aside ref={sidebarRef} className={`sidebar ${open ? "open" : ""}`}>
+  const onConfirmDeleteThread = async () => {
+    if (!deleteState?.threadId) return;
+    await onDeleteThread(deleteState.threadId);
+    setDeleteState(null);
+  };
 
-      <div className="sidebar-logo">(•‿•) SmartIA</div>
+      const onConfirmRenameThread = async () => {
+    if (!renameState?.threadId || !renameState?.title?.trim()) return;
+    await onRenameThread(renameState.threadId, renameState.title.trim());
+    setRenameState(null);
+  };
 
-      <div className="sidebar-top">
-        <button className="sidebar-btn primary" onClick={(e) => { onNewChat(e); closeIfMobile(); }} disabled={creatingThread}>
-          <PlusIcon className="icon-16" />
-          {creatingThread ? t("creating") : t("newChat")}
+      return (
+    <>
+      <aside ref={sidebarRef} className={`sidebar ${open ? "open" : ""}`}>
+        <div className="sidebar-logo">(•‿•) SmartIA</div>
+
+        <div className="sidebar-top">
+          <button className="sidebar-btn primary" onClick={(e) => { onNewChat(e); closeIfMobile(); }} disabled={creatingThread}>
+            <PlusIcon className="icon-16" />
+            {creatingThread ? t("creating") : t("newChat")}
+          </button>
+
+          <label className="sidebar-search-wrap">
+            <SearchIcon className="icon-16" />
+            <input className="sidebar-search" placeholder={t("searchChat")} onChange={(e) => onSearch(e.target.value)} />
+          </label>
+        </div>
+
+        <button className="sidebar-section-toggle" onClick={() => setChatsCollapsed((v) => !v)} aria-expanded={!chatsCollapsed}>
+          <span>{t("yourChats")}</span>
+          <span className={`chevron ${chatsCollapsed ? "collapsed" : ""}`}>▾</span>
         </button>
 
-        <label className="sidebar-search-wrap">
-          <SearchIcon className="icon-16" />
-          <input className="sidebar-search" placeholder={t("searchChat")} onChange={(e) => onSearch(e.target.value)} />
-        </label>
-      </div>
-
-      <button className="sidebar-section-toggle" onClick={() => setChatsCollapsed((v) => !v)} aria-expanded={!chatsCollapsed}>
-        <span>{t("yourChats")}</span>
-        <span className={`chevron ${chatsCollapsed ? "collapsed" : ""}`}>▾</span>
-      </button>
-
-      {!chatsCollapsed && (
-        <div className="sidebar-list custom-scrollbar">
-          {threads.map((tItem) => (
-            <div key={tItem.id} className={`thread-row ${activeThreadId === tItem.id ? "active" : ""}`}>
-              <button className="thread-title-btn" onClick={() => { onSelectThread(tItem.id); closeIfMobile(); }}>{tItem.title}</button>
-              <div className="thread-menu-wrap" ref={menuOpenFor === tItem.id ? menuRef : null}>
-                <button className="thread-more-btn" onClick={(e) => {
-                  e.stopPropagation();
-                  setMenuOpenFor((prev) => (prev === tItem.id ? null : tItem.id));
-                }}>
-                  <MoreIcon className="icon-16" />
-                </button>
-                {menuOpenFor === tItem.id && (
-                  <div className="thread-dropdown">
-                    <button onClick={() => {
-                      const next = prompt(t("newTitlePrompt"), tItem.title);
-                      if (next && next.trim()) onRenameThread(tItem.id, next.trim());
-                      setMenuOpenFor(null);
-                    }}>{t("rename")}</button>
-                    <button className="danger" onClick={() => {
-                      if (window.confirm(t("deleteChatConfirm"))) onDeleteThread(tItem.id);
-                      setMenuOpenFor(null);
-                    }}>{t("delete")}</button>
-                  </div>
-                )}
+        {!chatsCollapsed && (
+          <div className="sidebar-list custom-scrollbar">
+            {threads.map((tItem) => (
+              <div key={tItem.id} className={`thread-row ${activeThreadId === tItem.id ? "active" : ""}`}>
+                <button className="thread-title-btn" onClick={() => { onSelectThread(tItem.id); closeIfMobile(); }}>{tItem.title}</button>
+                <div className="thread-menu-wrap" ref={menuOpenFor === tItem.id ? menuRef : null}>
+                  <button className="thread-more-btn" onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpenFor((prev) => (prev === tItem.id ? null : tItem.id));
+                  }}>
+                    <MoreIcon className="icon-16" />
+                  </button>
+                  {menuOpenFor === tItem.id && (
+                    <div className="thread-dropdown">
+                      <button onClick={() => {
+                        setRenameState({ threadId: tItem.id, title: tItem.title, loading: false });
+                        setMenuOpenFor(null);
+                      }}>{t("rename")}</button>
+                      <button className="danger" onClick={() => {
+                        setDeleteState({ threadId: tItem.id, loading: false });
+                        setMenuOpenFor(null);
+                      }}>{t("delete")}</button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         )}
 
       <ul className="admin-menu">
-        <li><button className={`admin-link ${isActive("/admin/access") ? "active" : ""}`} onClick={() => { navigate("/admin/access"); closeIfMobile(); }}><KeyIcon className="icon-16" />{t("adminAccess")}</button></li>
-        <li><button className={`admin-link ${isActive("/admin/members") ? "active" : ""}`} onClick={() => { navigate("/admin/members"); closeIfMobile(); }}><UsersIcon className="icon-16" />{t("adminMembers")}</button></li>
-        <li><button className={`admin-link ${isActive("/admin/admins") ? "active" : ""}`} onClick={() => { navigate("/admin/admins"); closeIfMobile(); }}><ShieldIcon className="icon-16" />{t("adminAdmins")}</button></li>
-      </ul>
+          <li><button className={`admin-link ${isActive("/admin/access") ? "active" : ""}`} onClick={() => { navigate("/admin/access"); closeIfMobile(); }}><KeyIcon className="icon-16" />{t("adminAccess")}</button></li>
+          <li><button className={`admin-link ${isActive("/admin/members") ? "active" : ""}`} onClick={() => { navigate("/admin/members"); closeIfMobile(); }}><UsersIcon className="icon-16" />{t("adminMembers")}</button></li>
+          <li><button className={`admin-link ${isActive("/admin/admins") ? "active" : ""}`} onClick={() => { navigate("/admin/admins"); closeIfMobile(); }}><ShieldIcon className="icon-16" />{t("adminAdmins")}</button></li>
+        </ul>
 
-      <div className="sidebar-bottom">
-        <input ref={fileInputRef} type="file" style={{ display: "none" }} onChange={handleFileChange} />
-        <button
-          className={`sidebar-btn ${dragActive ? "drag-active" : ""}`}
-          onClick={() => { fileInputRef.current?.click(); closeIfMobile(); }}
-          onDragOver={(e) => { e.preventDefault(); if (!uploading) setDragActive(true); }}
-          onDragEnter={(e) => { e.preventDefault(); if (!uploading) setDragActive(true); }}
-          onDragLeave={() => setDragActive(false)}
-          onDrop={handleDrop}
-          disabled={uploading}
-        >
-          <FileIcon className="icon-16" />
-          {uploading ? t("uploadProgress") : t("addFile")}
-        </button>
+        <div className="sidebar-bottom">
+          <input ref={fileInputRef} type="file" style={{ display: "none" }} onChange={handleFileChange} />
+          <button
+            className={`sidebar-btn ${dragActive ? "drag-active" : ""}`}
+            onClick={() => { fileInputRef.current?.click(); closeIfMobile(); }}
+            onDragOver={(e) => { e.preventDefault(); if (!uploading) setDragActive(true); }}
+            onDragEnter={(e) => { e.preventDefault(); if (!uploading) setDragActive(true); }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={handleDrop}
+            disabled={uploading}
+          >
+            <FileIcon className="icon-16" />
+            {uploading ? t("uploadProgress") : t("addFile")}
+          </button>
+        </div>
+      </aside>
 
-      </div>
-    </aside>
+      {uploadState && (
+        <div className="sidebar-modal-backdrop" onClick={() => !uploadState.loading && setUploadState(null)}>
+          <div className="sidebar-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t("addFile")}</h3>
+            <p>{uploadState.file?.name}</p>
+            <select
+              className="admin-select"
+              value={uploadState.visibility}
+              onChange={(e) => setUploadState((prev) => ({ ...prev, visibility: e.target.value }))}
+              disabled={uploadState.loading}
+            >
+              <option value="private">private</option>
+              <option value="public">public</option>
+            </select>
+            <div className="sidebar-modal-actions">
+              <button className="admin-btn" onClick={() => setUploadState(null)} disabled={uploadState.loading}>{t("cancel")}</button>
+              <button className="admin-btn primary" onClick={onConfirmUpload} disabled={uploadState.loading}>{uploadState.loading ? t("loading") : t("yes")}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {renameState && (
+        <div className="sidebar-modal-backdrop" onClick={() => !renameState.loading && setRenameState(null)}>
+          <div className="sidebar-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t("rename")}</h3>
+            <input className="admin-input" value={renameState.title} onChange={(e) => setRenameState((prev) => ({ ...prev, title: e.target.value }))} />
+            <div className="sidebar-modal-actions">
+              <button className="admin-btn" onClick={() => setRenameState(null)}>{t("cancel")}</button>
+              <button className="admin-btn primary" onClick={onConfirmRenameThread}>{t("save")}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteState && (
+        <div className="sidebar-modal-backdrop" onClick={() => !deleteState.loading && setDeleteState(null)}>
+          <div className="sidebar-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t("delete")}</h3>
+            <p>{t("deleteChatConfirm")}</p>
+            <div className="sidebar-modal-actions">
+              <button className="admin-btn" onClick={() => setDeleteState(null)}>{t("no")}</button>
+              <button className="admin-btn primary" onClick={onConfirmDeleteThread}>{t("yes")}</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

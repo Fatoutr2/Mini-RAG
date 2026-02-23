@@ -5,7 +5,15 @@ import { useI18n } from "../i18n/LanguageContext";
 import { useAuth } from "../auth/AuthContext";
 import "../assets/css/navbar.css";
 
-export default function Navbar({ toggle = () => {}, role = "member", chatMode, onChatModeChange, sidebarOpen = true }) {
+export default function Navbar({
+  toggle = () => {},
+  role = "member",
+  chatMode,
+  onChatModeChange,
+  sidebarOpen = true,
+  showMenuButton = true,
+  onBack,
+}) {
   const showModeSwitch = typeof onChatModeChange === "function";
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
   const [profileOpen, setProfileOpen] = useState(false);
@@ -38,11 +46,17 @@ export default function Navbar({ toggle = () => {}, role = "member", chatMode, o
   return (
     <header className={`navbar ${sidebarOpen ? "with-sidebar" : ""}`}>
       <div className="nav-left">
-        <button className="menu-btn" onClick={toggle} aria-label={t("menuToggle")}>
-          <span />
-          <span />
-          <span />
-        </button>
+        {showMenuButton ? (
+          <button className="menu-btn" onClick={toggle} aria-label={t("menuToggle")}>
+            <span />
+            <span />
+            <span />
+          </button>
+        ) : (
+          <button className="menu-btn nav-back-btn" onClick={onBack} aria-label={t("back")}>
+            ← {t("back")}
+          </button>
+        )}
 
         {showModeSwitch && (
           <div className="nav-center-inline">

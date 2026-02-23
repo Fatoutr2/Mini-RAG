@@ -105,3 +105,41 @@
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
   background: rgba(16, 185, 129, 0.08);
 }
+
+.sidebar-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.5);
+  display: grid;
+  place-items: center;
+  z-index: 4000;
+  padding: 14px;
+}
+
+.sidebar-modal {
+  width: min(420px, 100%);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.sidebar-modal h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.sidebar-modal p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.sidebar-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

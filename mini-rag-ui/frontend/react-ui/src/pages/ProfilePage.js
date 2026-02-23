@@ -74,12 +74,9 @@ export default function ProfilePage() {
 
   return (
     <div className="app-layout">
-      <Navbar role={user?.role || "member"} sidebarOpen={false} />
+      <Navbar role={user?.role || "member"} sidebarOpen={false} showMenuButton={false} onBack={() => navigate(-1)} />
       <div className="content-row">
         <main className="admin-page-content profile-page-wrap">
-          <button className="profile-back-btn" onClick={() => navigate(-1)}>
-            ← {t("back")}
-          </button>
 
           <div className="admin-page-header">
             <h1 className="admin-page-title">{t("settings")}</h1>
@@ -89,47 +86,53 @@ export default function ProfilePage() {
           {error && <p className="admin-error">{error}</p>}
 
           <section className="admin-card profile-card">
-            <h2 className="admin-card-title">{t("profileInfo")}</h2>
-            <p className="admin-page-subtitle">{t("profileInfoHint")}</p>
-
-            <div className="profile-avatar-block">
-              {form.avatar_url ? (
-                <img src={form.avatar_url} alt="avatar" className="profile-avatar-image" />
-              ) : (
-                <div className="profile-avatar-placeholder">👤</div>
-              )}
-
-              <div className="profile-avatar-actions">
-                <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={onPickAvatar} />
-                <button className="admin-btn" type="button" onClick={() => fileInputRef.current?.click()}>{t("changePhoto")}</button>
-                <button className="admin-btn" type="button" onClick={() => setForm((p) => ({ ...p, avatar_url: "" }))}>{t("keepDefaultPhoto")}</button>
-              </div>
+            <div className="profile-card-header">
+              <h2 className="admin-card-title">{t("profileInfo")}</h2>
+              <p className="admin-page-subtitle">{t("profileInfoHint")}</p>
             </div>
 
-            <form className="profile-grid" onSubmit={onSave}>
-              <label>
-                <span>{t("firstName")}</span>
-                <input className="admin-input" value={form.first_name} onChange={(e) => setForm((p) => ({ ...p, first_name: e.target.value }))} />
-              </label>
-              <label>
-                <span>{t("lastName")}</span>
-                <input className="admin-input" value={form.last_name} onChange={(e) => setForm((p) => ({ ...p, last_name: e.target.value }))} />
-              </label>
-              <label>
-                <span>{t("email")}</span>
-                <input className="admin-input" value={form.email} disabled />
-              </label>
-              <label>
-                <span>{t("phoneNumber")}</span>
-                <input className="admin-input" value={form.phone_number} onChange={(e) => setForm((p) => ({ ...p, phone_number: e.target.value }))} />
-              </label>
-              <label className="profile-grid-full">
-                <span>{t("address")}</span>
-                <input className="admin-input" value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} />
-              </label>
+            <div className="profile-layout">
+              <aside className="profile-aside">
+                <div className="profile-avatar-block">
+                  {form.avatar_url ? (
+                    <img src={form.avatar_url} alt="avatar" className="profile-avatar-image" />
+                  ) : (
+                    <div className="profile-avatar-placeholder">👤</div>
+                  )}
+
+              <div className="profile-avatar-actions">
+                    <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={onPickAvatar} />
+                    <button className="admin-btn" type="button" onClick={() => fileInputRef.current?.click()}>{t("changePhoto")}</button>
+                    <button className="admin-btn" type="button" onClick={() => setForm((p) => ({ ...p, avatar_url: "" }))}>{t("keepDefaultPhoto")}</button>
+                  </div>
+                </div>
+              </aside>
+
+              <form className="profile-grid" onSubmit={onSave}>
+                <label>
+                  <span>{t("firstName")}</span>
+                  <input className="admin-input" value={form.first_name} onChange={(e) => setForm((p) => ({ ...p, first_name: e.target.value }))} />
+                </label>
+                <label>
+                  <span>{t("lastName")}</span>
+                  <input className="admin-input" value={form.last_name} onChange={(e) => setForm((p) => ({ ...p, last_name: e.target.value }))} />
+                </label>
+                <label>
+                  <span>{t("email")}</span>
+                  <input className="admin-input" value={form.email} disabled />
+                </label>
+                <label>
+                  <span>{t("phoneNumber")}</span>
+                  <input className="admin-input" value={form.phone_number} onChange={(e) => setForm((p) => ({ ...p, phone_number: e.target.value }))} />
+                </label>
+                <label className="profile-grid-full">
+                  <span>{t("address")}</span>
+                  <input className="admin-input" value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} />
+                </label>
 
               <button className="admin-btn primary profile-save-btn" disabled={saving}>{saving ? t("loading") : t("save")}</button>
-            </form>
+              </form>
+            </div>
           </section>
         </main>
       </div>
