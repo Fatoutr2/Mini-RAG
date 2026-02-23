@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import AdminSidebar from "../components/AdminSidebar";
-import { deleteUser, listUsers, updateUser, updateUserRole } from "../services/adminUserService";
+import { useI18n } from "../i18n/LanguageContext";
+import { toast } from "../utils/toast";
+import { deleteUser, listUsers, updateUserRole } from "../services/adminUserService";
 import { listThreads, createThread, renameThread, deleteThread, setThreadMode } from "../services/chatService";
 import { uploadDocument } from "../services/uploadService";
 import "../assets/css/layout.css";
@@ -12,13 +14,15 @@ export default function Admins() {
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 900);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
+  const [roleState, setRoleState] = useState(null);
+  const [confirmState, setConfirmState] = useState(null);
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [threads, setThreads] = useState([]);
   const [activeThreadId, setActiveThreadId] = useState(null);
   const [searchValue, setSearchValue] = useState("");
   const [creatingThread, setCreatingThread] = useState(false);
   const [chatMode, setChatMode] = useState("rag");
-
 
   const load = async () => {
     try {
@@ -36,24 +40,46 @@ export default function Admins() {
 
   const admins = useMemo(() => users.filter((u) => u.role === "admin"), [users]);
 
-  const onEdit = async (u) => {
-    const email = prompt("Nouvel email", u.email);
-    if (!email) return;
-    await updateUser(u.id, { email: email.trim() });
-    await load();
+  const onRole = (u) => {
+    setRoleState({ userId: u.id, email: u.email, role: u.role, loading: false });
   };
 
-  const onRole = async (u) => {
-    const role = prompt("Nouveau rôle: member/admin/visitor", u.role);
-    if (!role) return;
-    await updateUserRole(u.id, role.trim());
-    await load();
+  const onConfirmRoleChange = async () => {
+    if (!roleState?.userId || !roleState?.role?.trim()) return;
+    try {
+      setRoleState((prev) => ({ ...prev, loading: true }));
+      await updateUserRole(roleState.userId, roleState.role.trim());
+      setRoleState(null);
+      toast.success(t("userUpdateSuccess"));
+      await load();
+    } catch (e) {
+      setError(e.message);
+      setRoleState(null);
+    }
   };
 
-  const onDelete = async (u) => {
-    if (!window.confirm(`Supprimer ${u.email} ?`)) return;
-    await deleteUser(u.id);
-    await load();
+  const onDelete = (u) => {
+    setConfirmState({
+      message: t("deleteUserConfirm", { email: u.email }),
+      loading: false,
+      onConfirm: async () => {
+        await deleteUser(u.id);
+        toast.success(t("delete"));
+        await load();
+      },
+    });
+  };
+
+  const onConfirmAction = async () => {
+    if (!confirmState?.onConfirm) return;
+    try {
+      setConfirmState((prev) => ({ ...prev, loading: true }));
+      await confirmState.onConfirm();
+      setConfirmState(null);
+    } catch (e) {
+      setError(e.message);
+      setConfirmState(null);
+    }
   };
 
   const refreshThreads = async (search = "") => {
@@ -61,7 +87,7 @@ export default function Admins() {
     setThreads(data);
     setActiveThreadId((prevId) => {
       if (!prevId && data.length > 0) return data[0].id;
-      if (prevId && !data.some((t) => t.id === prevId)) return data.length ? data[0].id : null;
+      if (prevId && !data.some((tItem) => tItem.id === prevId)) return data.length ? data[0].id : null;
       return prevId;
     });
   };
@@ -69,8 +95,9 @@ export default function Admins() {
   useEffect(() => {
     refreshThreads("");
   }, []);
+
   useEffect(() => {
-    const active = threads.find((t) => t.id === activeThreadId);
+    const active = threads.find((tItem) => tItem.id === activeThreadId);
     if (active?.mode) setChatMode(String(active.mode).toLowerCase());
   }, [threads, activeThreadId]);
 
@@ -79,7 +106,6 @@ export default function Admins() {
     setThreadMode(activeThreadId, chatMode).catch(() => {});
   }, [activeThreadId, chatMode]);
 
-
   const handleNewChat = async (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
@@ -87,10 +113,10 @@ export default function Admins() {
 
     setCreatingThread(true);
     try {
-      const t = await createThread(chatMode);
-      setThreads((prev) => [t, ...prev]);
-      setActiveThreadId(t.id);
-      navigate(`/admin?threadId=${t.id}`);
+      const tItem = await createThread(chatMode);
+      setThreads((prev) => [tItem, ...prev]);
+      setActiveThreadId(tItem.id);
+      navigate(`/admin?threadId=${tItem.id}`);
     } finally {
       setCreatingThread(false);
     }
@@ -103,15 +129,14 @@ export default function Admins() {
 
   const handleRename = async (threadId, title) => {
     const updated = await renameThread(threadId, title);
-    setThreads((prev) => prev.map((t) => (t.id === threadId ? updated : t)));
+    setThreads((prev) => prev.map((tItem) => (tItem.id === threadId ? updated : tItem)));
   };
 
   const handleDeleteThread = async (threadId) => {
     await deleteThread(threadId);
-    setThreads((prev) => prev.filter((t) => t.id !== threadId));
+    setThreads((prev) => prev.filter((tItem) => tItem.id !== threadId));
     setActiveThreadId((prevId) => (prevId === threadId ? null : prevId));
   };
-
 
   return (
     <div className={`app-layout ${sidebarOpen ? "sidebar-open" : ""}`}>
@@ -131,26 +156,23 @@ export default function Admins() {
           onUploadFile={uploadDocument}
         />
 
-
         <main className="admin-page-content">
           <div className="admin-page-header">
-            <h1 className="admin-page-title">🛡 Admins</h1>
-            <p className="admin-page-subtitle">Gérer les comptes administrateurs : édition, rôle et suppression.</p>
+            <h1 className="admin-page-title">🛡 {t("adminAdmins")}</h1>
+            <p className="admin-page-subtitle">{t("usersList")}</p>
           </div>
 
           {error && <p className="admin-error">{error}</p>}
 
           <section className="admin-card">
-            <h2 className="admin-card-title">Liste des admins</h2>
+            <h2 className="admin-card-title">{t("usersList")}</h2>
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Email</th>
-                    <th>Rôle</th>
-                    <th>Actif</th>
-                    <th>Actions</th>
+                    <th>{t("email")}</th>
+                    <th>{t("actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -159,14 +181,9 @@ export default function Admins() {
                       <td>{u.id}</td>
                       <td>{u.email}</td>
                       <td>
-                        <span className={`role-badge ${u.role}`}>{u.role}</span>
-                      </td>
-                      <td>{u.is_active ? "Oui" : "Non"}</td>
-                      <td>
                         <div className="admin-actions">
-                          <button className="admin-btn" onClick={() => onEdit(u)}>Modifier</button>
-                          <button className="admin-btn" onClick={() => onRole(u)}>Changer rôle</button>
-                          <button className="admin-btn danger" onClick={() => onDelete(u)}>Supprimer</button>
+                          <button className="admin-btn" onClick={() => onRole(u)}>{t("changeRole")}</button>
+                          <button className="admin-btn danger" onClick={() => onDelete(u)}>{t("delete")}</button>
                         </div>
                       </td>
                     </tr>
@@ -177,6 +194,37 @@ export default function Admins() {
           </section>
         </main>
       </div>
+      
+      {roleState && (
+        <div className="admin-modal-backdrop" onClick={() => !roleState.loading && setRoleState(null)}>
+          <section className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="admin-card-title">{t("changeRole")}</h2>
+            <p className="admin-page-subtitle">{roleState.email}</p>
+            <select className="admin-select" value={roleState.role} onChange={(e) => setRoleState((prev) => ({ ...prev, role: e.target.value }))}>
+              <option value="visitor">visitor</option>
+              <option value="member">member</option>
+              <option value="admin">admin</option>
+            </select>
+            <div className="admin-modal-actions" style={{ marginTop: 12 }}>
+              <button className="admin-btn" type="button" disabled={roleState.loading} onClick={() => setRoleState(null)}>{t("cancel")}</button>
+              <button className="admin-btn primary" type="button" disabled={roleState.loading} onClick={onConfirmRoleChange}>{roleState.loading ? t("loading") : t("save")}</button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {confirmState && (
+        <div className="admin-modal-backdrop" onClick={() => !confirmState.loading && setConfirmState(null)}>
+          <section className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="admin-card-title">{t("actions")}</h2>
+            <p className="admin-page-subtitle">{confirmState.message}</p>
+            <div className="admin-modal-actions" style={{ marginTop: 12 }}>
+              <button className="admin-btn" type="button" disabled={confirmState.loading} onClick={() => setConfirmState(null)}>{t("no")}</button>
+              <button className="admin-btn primary" type="button" disabled={confirmState.loading} onClick={onConfirmAction}>{confirmState.loading ? t("loading") : t("yes")}</button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
