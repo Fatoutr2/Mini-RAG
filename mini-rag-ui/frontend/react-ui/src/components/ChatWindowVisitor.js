@@ -13,6 +13,13 @@ function ChatWindow({ visitor = false }) {
 
   const endpoint = visitor ? "http://127.0.0.1:8000/rag/visitor" : "http://127.0.0.1:8000/query";
 
+  const visitorSuggestions = [
+    t("visitorSuggestionServices"),
+    t("visitorSuggestionContact"),
+    t("visitorSuggestionAddress"),
+    t("visitorSuggestionHours"),
+  ];
+
   const headers = visitor
     ? { "Content-Type": "application/json" }
     : {
@@ -49,15 +56,16 @@ function ChatWindow({ visitor = false }) {
     });
   }, [lang, t]);
 
-  const askRAG = async () => {
-    if (!question.trim()) return;
+  const askRAG = async (presetQuestion) => {
+    const askedQuestion = (presetQuestion ?? question).trim();
+    if (!askedQuestion) return;
 
     if (!visitor && !localStorage.getItem("token")) {
       setError(t("visitorConnectRequired"));
       return;
     }
 
-    const userMessage = { role: "user", content: question };
+    const userMessage = { role: "user", content: askedQuestion };
     setMessages((prev) => [...prev, userMessage]);
 
     setLoading(true);
@@ -68,7 +76,7 @@ function ChatWindow({ visitor = false }) {
       const res = await fetch(endpoint, {
         method: "POST",
         headers,
-        body: JSON.stringify({ question })
+        body: JSON.stringify({ question: askedQuestion })
       });
 
       if (!res.ok) throw new Error(t("serverError"));
@@ -102,6 +110,22 @@ function ChatWindow({ visitor = false }) {
 
         {loading && <div className="bubble assistant">⏳ {t("visitorLoading")}</div>}
       </div>
+
+      {visitor && (
+        <div className="visitor-suggestions">
+          {visitorSuggestions.map((suggestion) => (
+            <button
+              key={suggestion}
+              className="visitor-suggestion-btn"
+              type="button"
+              onClick={() => askRAG(suggestion)}
+              disabled={loading}
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="chat-input">
         <input

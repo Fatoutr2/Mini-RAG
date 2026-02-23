@@ -75,6 +75,10 @@ const messages = {
     visitorLoading: "Réponse en cours...",
     visitorPlaceholderSmartIA: "Posez votre question sur SmartIA…",
     visitorPlaceholderQuestion: "Posez votre question…",
+    visitorSuggestionServices: "Quels services proposez-vous ?",
+    visitorSuggestionContact: "Comment puis-je vous contacter ?",
+    visitorSuggestionAddress: "Quelle est votre adresse ?",
+    visitorSuggestionHours: "Quels sont vos horaires ?",
 
     newChat: "Nouveau chat",
     creating: "Création...",
@@ -216,6 +220,10 @@ const messages = {
     visitorLoading: "Response in progress...",
     visitorPlaceholderSmartIA: "Ask your question about SmartIA…",
     visitorPlaceholderQuestion: "Ask your question…",
+    visitorSuggestionServices: "What services do you offer?",
+    visitorSuggestionContact: "How can I contact you?",
+    visitorSuggestionAddress: "What is your address?",
+    visitorSuggestionHours: "What are your opening hours?",
 
     newChat: "New chat",
     creating: "Creating...",
@@ -357,6 +365,10 @@ const messages = {
     visitorLoading: "Antwort wird erstellt...",
     visitorPlaceholderSmartIA: "Stelle deine Frage zu SmartIA…",
     visitorPlaceholderQuestion: "Stelle deine Frage…",
+    visitorSuggestionServices: "Welche Dienstleistungen bieten Sie an?",
+    visitorSuggestionContact: "Wie kann ich Sie kontaktieren?",
+    visitorSuggestionAddress: "Wie lautet Ihre Adresse?",
+    visitorSuggestionHours: "Welche Öffnungszeiten haben Sie?",
 
     newChat: "Neuer Chat",
     creating: "Wird erstellt...",
@@ -498,6 +510,10 @@ const messages = {
     visitorLoading: "Respuesta en curso...",
     visitorPlaceholderSmartIA: "Haz tu pregunta sobre SmartIA…",
     visitorPlaceholderQuestion: "Haz tu pregunta…",
+    visitorSuggestionServices: "¿Qué servicios ofrecen?",
+    visitorSuggestionContact: "¿Cómo puedo contactarlos?",
+    visitorSuggestionAddress: "¿Cuál es su dirección?",
+    visitorSuggestionHours: "¿Cuáles son sus horarios?",
 
     newChat: "Nuevo chat",
     creating: "Creando...",
