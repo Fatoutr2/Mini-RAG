@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import { useAuth } from "../auth/AuthContext";
 import { useI18n } from "../i18n/LanguageContext";
 import { getMyProfile, updateMyProfile } from "../services/profileService";
+import { toast } from "sonner";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
@@ -14,7 +15,6 @@ export default function ProfilePage() {
   const fileInputRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -56,7 +56,6 @@ export default function ProfilePage() {
     e.preventDefault();
     setSaving(true);
     setError("");
-    setSuccess("");
     try {
       await updateMyProfile({
         first_name: form.first_name,
@@ -65,7 +64,7 @@ export default function ProfilePage() {
         address: form.address,
         avatar_url: form.avatar_url,
       });
-      setSuccess(t("saveSuccess"));
+      toast.success(t("saveSuccess"));
     } catch (e2) {
       setError(e2.message);
     } finally {
@@ -88,7 +87,6 @@ export default function ProfilePage() {
           </div>
 
           {error && <p className="admin-error">{error}</p>}
-          {success && <p className="admin-success">{success}</p>}
 
           <section className="admin-card profile-card">
             <h2 className="admin-card-title">{t("profileInfo")}</h2>

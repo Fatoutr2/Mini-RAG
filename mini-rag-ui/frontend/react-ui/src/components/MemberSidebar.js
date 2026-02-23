@@ -3,6 +3,7 @@ import { useI18n } from "../i18n/LanguageContext";
 import { FileIcon, MoreIcon, PlusIcon, SearchIcon } from "./Icons";
 import "../assets/css/sidebar.css";
 import "../assets/css/layout.css";
+import { toast } from "sonner";
 
 export default function MemberSidebar({
   open,
@@ -36,10 +37,10 @@ export default function MemberSidebar({
     setUploading(true);
     try {
       await onUploadFile(file);
-      window.alert(`${t("uploadDoneIn")} data/private`);
+      toast.success(`${t("uploadDoneIn")} data/private`);
       closeIfMobile();
     } catch (err) {
-      window.alert(err.message || t("uploadImpossible"));
+      toast.error(err.message || t("uploadImpossible"));
     } finally {
       setUploading(false);
     }

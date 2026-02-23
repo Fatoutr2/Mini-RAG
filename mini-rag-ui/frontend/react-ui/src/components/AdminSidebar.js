@@ -4,6 +4,7 @@ import { useI18n } from "../i18n/LanguageContext";
 import { FileIcon, KeyIcon, MoreIcon, PlusIcon, SearchIcon, ShieldIcon, UsersIcon } from "./Icons";
 import "../assets/css/sidebar.css";
 import "../assets/css/layout.css";
+import { toast } from "sonner";
 
 export default function AdminSidebar({
   open,
@@ -52,17 +53,17 @@ export default function AdminSidebar({
     const visibility = window.prompt(t("destinationPrompt"), "private")?.trim().toLowerCase() || "private";
 
     if (!["public", "private"].includes(visibility)) {
-      window.alert(t("destinationInvalid"));
+      toast.error(t("destinationInvalid"));
       return;
     }
 
     setUploading(true);
     try {
       await onUploadFile(file, visibility);
-      window.alert(`${t("uploadDoneIn")} data/${visibility}`);
+      toast.success(`${t("uploadDoneIn")} data/${visibility}`);
       closeIfMobile();
     } catch (err) {
-      window.alert(err.message || t("uploadImpossible"));
+      toast.error(err.message || t("uploadImpossible"));
     } finally {
       setUploading(false);
     }

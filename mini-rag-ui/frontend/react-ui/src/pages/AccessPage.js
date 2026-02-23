@@ -8,6 +8,7 @@ import { listThreads, createThread, renameThread, deleteThread } from "../servic
 import { uploadDocument } from "../services/uploadService";
 import { deleteUploadedFile, listUploadedFiles, renameUploadedFile } from "../services/adminFileService";
 import { MoreIcon, SearchIcon } from "../components/Icons";
+import { toast } from "sonner";
 import "../assets/css/layout.css";
 import "../assets/css/admin-pages.css";
 
@@ -28,7 +29,6 @@ export default function AccessPage() {
   const { t, lang } = useI18n();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState(blankCreateForm);
   const navigate = useNavigate();
@@ -95,11 +95,10 @@ export default function AccessPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess("");
     try {
       await createUser(form);
       setForm(blankCreateForm);
-      setSuccess(t("userCreateSuccess"));
+      toast.success(t("userCreateSuccess"));
       await loadUsers();
     } catch (e2) {
       setError(e2.message);
@@ -129,11 +128,10 @@ export default function AccessPage() {
     try {
       setEditing(true);
       setError("");
-      setSuccess("");
       await updateUser(editingUser.id, editForm);
       setEditingUser(null);
       setEditForm(null);
-      setSuccess(t("userUpdateSuccess"));
+      toast.success(t("userUpdateSuccess"));
       await loadUsers();
     } catch (e2) {
       setError(e2.message);
@@ -297,7 +295,6 @@ export default function AccessPage() {
           </section>
 
           {error && <p className="admin-error">{error}</p>}
-          {success && <p className="admin-success">{success}</p>}
 
           <section className="admin-card">
             <div className="admin-section-header">
