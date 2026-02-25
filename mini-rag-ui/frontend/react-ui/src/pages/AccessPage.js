@@ -520,7 +520,6 @@ export default function AccessPage() {
               <input className="admin-input" placeholder={t("address")} value={editForm.address} onChange={(e) => setEditForm((p) => ({ ...p, address: e.target.value }))} />
               <input className="admin-input admin-form-full" placeholder={t("avatarUrl")} value={editForm.avatar_url} onChange={(e) => setEditForm((p) => ({ ...p, avatar_url: e.target.value }))} />
               <select className="admin-select" value={editForm.role} onChange={(e) => setEditForm((p) => ({ ...p, role: e.target.value }))}>
-                <option value="visitor">visitor</option>
                 <option value="member">member</option>
                 <option value="admin">admin</option>
               </select>

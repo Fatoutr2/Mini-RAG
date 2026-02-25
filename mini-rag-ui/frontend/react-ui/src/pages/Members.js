@@ -201,7 +201,6 @@ export default function Members() {
             <h2 className="admin-card-title">{t("changeRole")}</h2>
             <p className="admin-page-subtitle">{roleState.email}</p>
             <select className="admin-select" value={roleState.role} onChange={(e) => setRoleState((prev) => ({ ...prev, role: e.target.value }))}>
-              <option value="visitor">visitor</option>
               <option value="member">member</option>
               <option value="admin">admin</option>
             </select>

@@ -113,7 +113,7 @@ const messages = {
     createChatFirst: "Créez un nouveau chat d'abord...",
     addFileAria: "Ajouter un fichier",
 
-    accessTitle: "🔑 Accès",
+    accessTitle: "Accès",
     accessSubtitle: "Créer des utilisateurs et gérer tous les accès.",
     addUser: "Ajouter un utilisateur",
     email: "Email",
@@ -258,7 +258,7 @@ const messages = {
     createChatFirst: "Create a new chat first...",
     addFileAria: "Add file",
 
-    accessTitle: "🔑 Access",
+    accessTitle: "Access",
     accessSubtitle: "Create users and manage all access.",
     addUser: "Add user",
     email: "Email",
@@ -403,7 +403,7 @@ const messages = {
     createChatFirst: "Erstellen Sie zuerst einen neuen Chat...",
     addFileAria: "Datei hinzufügen",
 
-    accessTitle: "🔑 Zugriff",
+    accessTitle: "Zugriff",
     accessSubtitle: "Benutzer erstellen und alle Zugriffe verwalten.",
     addUser: "Benutzer hinzufügen",
     email: "E-Mail",
@@ -548,7 +548,7 @@ const messages = {
     createChatFirst: "Primero crea un nuevo chat...",
     addFileAria: "Añadir archivo",
 
-    accessTitle: "🔑 Acceso",
+    accessTitle: "Acceso",
     accessSubtitle: "Crear usuarios y gestionar todos los accesos.",
     addUser: "Agregar usuario",
     email: "Email",
